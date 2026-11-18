@@ -1,0 +1,17 @@
+{
+  "product": "Just-DS",
+  "version": "1.1.0",
+  "url": "https://deesser.voltamix.studio/downloads/Just-DS-1.1.0-macOS.pkg",
+  "sha256": "b6ba1d6793d34a5fafd0339198318cfab579039177d52f9eaabdd3fcfb77db40",
+  "bundleUrl": "https://deesser.voltamix.studio/downloads/Just-DS-1.1.0-macOS-update.zip",
+  "bundleSha256": "8f6602321ed0ee4cd3e641a7aa83e3ee6a303836d3ad21304e86a2a9e6b604d3",
+  "notes": {
+    "ko": "* MIDI Learn 기능 추가",
+    "en": "* MIDI Learn added"
+  },
+  "windows": {
+    "version": "1.1.0",
+    "url": "https://deesser.voltamix.studio/downloads/Just-DS-1.1.0-Windows-Setup.exe",
+    "sha256": "34042eeb9778afb050e6fe1f62093ecd2b0345e1601de461a0b1af2a276f9e2d"
+  }
+}
