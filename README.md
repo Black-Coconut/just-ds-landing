@@ -27,6 +27,7 @@ FabFilter 로고·이미지·문장은 가져오지 않고, 제품명은 비교�
 |---|---|
 | **다운로드 링크 넣기** | `lib/site.ts`의 `DOWNLOADS.windows` / `DOWNLOADS.mac`. 비워 두면 버튼이 "곧 공개"로 비활성화된다 |
 | 버전 | `lib/site.ts`의 `VERSION` |
+| **설치파일·자동 업데이트 파일** | `public/downloads/` (pkg·update.zip·Setup.exe), `public/updates/latest.json`. 플러그인이 `https://deesser.voltamix.studio/updates/latest.json`을 하루 1번 읽으므로 **이 경로는 옮기지 않는다.** 파일은 받은 그대로 넣고(재압축 금지), `latest.json`은 새 파일들을 넣은 같은 커밋 또는 그 뒤에 바꾼다 |
 | Google Analytics | Vercel 환경변수 `NEXT_PUBLIC_GA_ID`(예: `G-XXXXXXXXXX`). 비어 있으면 GA를 로드하지 않는다. 바꾼 뒤 재배포 필요 |
 | 문구 (한/영) | `lib/content.ts` — `**굵게**` 표기 지원 |
 | 제목·설명·OG 태그 | `lib/content.ts`의 `meta`, 공통 설정은 `lib/seo.ts` |
