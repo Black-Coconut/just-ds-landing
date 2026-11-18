@@ -27,6 +27,7 @@ FabFilter 로고·이미지·문장은 가져오지 않고, 제품명은 비교�
 |---|---|
 | **다운로드 링크 넣기** | `lib/site.ts`의 `DOWNLOADS.windows` / `DOWNLOADS.mac`. 비워 두면 버튼이 "곧 공개"로 비활성화된다 |
 | 버전 | `lib/site.ts`의 `VERSION` |
+| Google Analytics | Vercel 환경변수 `NEXT_PUBLIC_GA_ID`(예: `G-XXXXXXXXXX`). 비어 있으면 GA를 로드하지 않는다. 바꾼 뒤 재배포 필요 |
 | 문구 (한/영) | `lib/content.ts` — `**굵게**` 표기 지원 |
 | 제목·설명·OG 태그 | `lib/content.ts`의 `meta`, 공통 설정은 `lib/seo.ts` |
 | 스타일 | `app/globals.css` (색은 맨 위 `:root` 변수) |

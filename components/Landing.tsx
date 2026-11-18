@@ -7,6 +7,7 @@ import Demo from "./Demo";
 import LangHint from "./LangHint";
 import LangSwitch, { LangLink } from "./LangSwitch";
 import JsonLd from "./JsonLd";
+import DownloadButton from "./DownloadButton";
 
 /** "**bold**" → <strong>bold</strong> */
 function rich(s: string): ReactNode[] {
@@ -236,7 +237,7 @@ export default function Landing({ t }: { t: Dict }) {
                     </ul>
                     <div className="path well">{c.path}</div>
                     {url ? (
-                      <a className="btn btn-gold" href={url} download>{c.ready}</a>
+                      <DownloadButton href={url} platform={c.platform} lang={t.lang}>{c.ready}</DownloadButton>
                     ) : (
                       <>
                         <span className="btn btn-gold" aria-disabled="true">{t.download.soonLabel}</span>

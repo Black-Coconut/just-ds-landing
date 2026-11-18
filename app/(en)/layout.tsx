@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { barlow, barlowCondensed } from "@/lib/fonts";
+import Analytics from "@/components/Analytics";
 import "../globals.css";
 
 export { viewport } from "@/lib/seo";
@@ -8,7 +9,10 @@ export { viewport } from "@/lib/seo";
 export default function EnglishRootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en" className={`${barlowCondensed.variable} ${barlow.variable}`}>
-      <body>{children}</body>
+      <body>
+        {children}
+        <Analytics />
+      </body>
     </html>
   );
 }

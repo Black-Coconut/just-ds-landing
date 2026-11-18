@@ -2,6 +2,7 @@
 
 import type { MouseEvent, ReactNode } from "react";
 import { LANG_COOKIE, LANG_COOKIE_MAX_AGE, pathFor, type Lang } from "@/lib/i18n";
+import { track } from "@/lib/track";
 
 /** Remember an explicit choice so "/" sends this visitor to the same language next time. */
 export function rememberLang(lang: Lang) {
@@ -11,6 +12,7 @@ export function rememberLang(lang: Lang) {
 /** Plain link to the other language (works without JS); with JS it also keeps the current #section. */
 function switchTo(e: MouseEvent<HTMLAnchorElement>, lang: Lang, current: Lang) {
   rememberLang(lang);
+  if (lang !== current) track("language_switch", { from: current, to: lang });
   if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return; // let new-tab clicks through
   e.preventDefault();
   if (lang !== current) window.location.assign(pathFor(lang) + window.location.hash);
