@@ -1,6 +1,5 @@
 export const SITE_URL = "https://deesser.voltamix.studio";
 export const VERSION = "0.7.4";
-export const PRO_DS_PRICE = "$199"; // FabFilter shop list price (USD, excl. tax), checked 2026-11
 
 /* ============================================================
    DOWNLOAD LINKS — fill these in when the builds are ready.

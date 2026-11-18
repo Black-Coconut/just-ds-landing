@@ -20,7 +20,7 @@ export function buildMetadata(t: Dict): Metadata {
         : ["de-esser", "free de-esser", "de-esser VST", "free Pro-DS alternative", "breath remover", "mouth click remover", "sibilance", "free VST3", "vocal mixing"],
     alternates: {
       canonical: t.path,
-      languages: { ko: "/", en: "/en", "x-default": "/en" },
+      languages: { ko: "/ko", en: "/en", "x-default": "/" },
     },
     openGraph: {
       type: "website",

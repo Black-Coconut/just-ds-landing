@@ -1,15 +1,21 @@
 import type { ReactNode } from "react";
 import type { Dict } from "@/lib/content";
-import { DOWNLOADS, PRO_DS_PRICE } from "@/lib/site";
+import { DOWNLOADS } from "@/lib/site";
 import { KnobArt, KnobSprite } from "./Knob";
 import HeroKnob from "./HeroKnob";
 import Demo from "./Demo";
 import LangHint from "./LangHint";
+import LangSwitch, { LangLink } from "./LangSwitch";
 import JsonLd from "./JsonLd";
 
 /** "**bold**" → <strong>bold</strong> */
 function rich(s: string): ReactNode[] {
   return s.split(/\*\*(.+?)\*\*/g).map((part, i) => (i % 2 ? <strong key={i}>{part}</strong> : part));
+}
+
+/** Keep product names on one line ("Pro-" / "DS" breaks look broken). */
+function keepNames(s: string): ReactNode[] {
+  return s.split(/(Pro-DS|Just-DS)/g).map((part, i) => (i % 2 ? <span className="nowrap" key={i}>{part}</span> : part));
 }
 
 const WindowsIcon = () => (
@@ -35,7 +41,6 @@ function SectionHead({ id, eyebrow, title, lede }: { id: string; eyebrow: string
 
 export default function Landing({ t }: { t: Dict }) {
   const year = new Date().getFullYear();
-  const [koLabel, enLabel] = t.langSwitch.html;
 
   return (
     <>
@@ -48,8 +53,8 @@ export default function Landing({ t }: { t: Dict }) {
           <a className="brand" href={t.path} aria-label="Just-DS home">
             <KnobArt rotate={-35} />
             <span className="brand-text">
-              <span className="brand-maker">VOLTA</span>
               <span className="brand-name">Just-DS</span>
+              <span className="brand-maker">by VOLTA</span>
             </span>
           </a>
           <nav className="nav" aria-label={t.nav.aria}>
@@ -60,9 +65,7 @@ export default function Landing({ t }: { t: Dict }) {
             <a className="nav-shop" href="#download" aria-label={t.nav.shopAria}><s>{t.nav.shop}</s></a>
           </nav>
           <div className="header-actions">
-            <a className="lang-switch" href={t.langSwitch.href} hrefLang={t.langSwitch.hreflang} lang={t.langSwitch.hreflang}>
-              {t.lang === "ko" ? <><b>{koLabel}</b> / {enLabel}</> : <>{koLabel} / <b>{enLabel}</b></>}
-            </a>
+            <LangSwitch current={t.lang} aria={t.langToggle.aria} />
             <a className="btn btn-gold btn-sm" href="#download">{t.headerCta}</a>
           </div>
         </div>
@@ -78,15 +81,14 @@ export default function Landing({ t }: { t: Dict }) {
                 Just<span className="dot" aria-hidden="true"> • </span><span className="sr-only">-</span>DS
                 <span className="sr-only">{t.hero.h1Extra}</span>
               </h1>
+              <p className="hero-by">by <a href="https://voltamix.studio">VOLTA</a></p>
               <p className="hero-tagline">{t.hero.tagline}</p>
               <p className="hero-claim">
-                <span className="line">{t.hero.claim[0]}</span>
-                <span className="line dim">{t.hero.claim[1]}</span>
+                <span className="line">{keepNames(t.hero.claim[0])}</span>
+                <span className="line dim">{keepNames(t.hero.claim[1])}</span>
                 <span className="line">{t.hero.claim[2]} <span className="zero">$0</span></span>
               </p>
               <div className="price-row" aria-label={t.hero.priceAria}>
-                <span className="price-old">{PRO_DS_PRICE}</span>
-                <span className="price-arrow" aria-hidden="true">→</span>
                 <span className="price-new">$0</span>
                 <span className="price-note">{t.hero.priceNote}</span>
               </div>
@@ -125,7 +127,7 @@ export default function Landing({ t }: { t: Dict }) {
               {t.intro.body.map((p, i) => <p className="lede" key={i}>{rich(p)}</p>)}
             </div>
             <figure className="quote-card panel">
-              <blockquote>“{t.intro.quote}”</blockquote>
+              <blockquote>“{keepNames(t.intro.quote)}”</blockquote>
               <figcaption>
                 <KnobArt rotate={-100} className="quote-avatar" />
                 <span>— {t.intro.quoteBy}</span>
@@ -192,11 +194,6 @@ export default function Landing({ t }: { t: Dict }) {
                   </tr>
                 </thead>
                 <tbody>
-                  <tr className="price">
-                    <th scope="row">{t.compare.priceLabel}</th>
-                    <td className="them">{PRO_DS_PRICE}</td>
-                    <td className="us">$0</td>
-                  </tr>
                   {t.compare.rows.map((r) => (
                     <tr key={r.label} className={r.extra ? "extra" : undefined}>
                       <th scope="row" data-badge={r.extra ? t.compare.extraBadge : undefined}>{r.label}</th>
@@ -208,25 +205,6 @@ export default function Landing({ t }: { t: Dict }) {
               </table>
             </div>
             <p className="footnote">{t.compare.footnote}</p>
-          </div>
-        </section>
-
-        {/* ---------- awards (none, honestly) ---------- */}
-        <section className="section awards-section" aria-labelledby="awards-title">
-          <div className="wrap">
-            <div className="section-head">
-              <h2 id="awards-title">{t.awards.title}</h2>
-              <p className="lede">{t.awards.note}</p>
-            </div>
-            <ul className="awards">
-              {t.awards.badges.map((b) => (
-                <li className="award" key={b.top}>
-                  <span className="award-top">{b.top}</span>
-                  <span className="award-main">{b.main}</span>
-                  <span className="award-bottom">{b.bottom}</span>
-                </li>
-              ))}
-            </ul>
           </div>
         </section>
 
@@ -330,12 +308,10 @@ export default function Landing({ t }: { t: Dict }) {
       <footer className="site-footer">
         <div className="wrap">
           <div className="footer-top">
-            <span>© {year} Volta · Just-DS</span>
+            <span>Just-DS by Volta · © {year}</span>
             <nav className="footer-links" aria-label={t.footer.aria}>
               <a href="https://voltamix.studio">voltamix.studio</a>
-              <a href={t.footer.otherLang.href} hrefLang={t.footer.otherLang.hreflang} lang={t.footer.otherLang.hreflang}>
-                {t.footer.otherLang.label}
-              </a>
+              <LangLink lang={t.footer.otherLang.hreflang} current={t.lang}>{t.footer.otherLang.label}</LangLink>
             </nav>
           </div>
           <p className="legal">{t.footer.legal}</p>

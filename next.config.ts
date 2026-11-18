@@ -21,9 +21,10 @@ const nextConfig: NextConfig = {
     ];
   },
   async redirects() {
+    // "/" itself is handled in proxy.ts (saved choice or browser language)
     return [
-      { source: "/ko", destination: "/", permanent: true },
-      { source: "/en/", destination: "/en", permanent: true },
+      { source: "/kr", destination: "/ko", permanent: true },
+      { source: "/kr/:path*", destination: "/ko", permanent: true },
     ];
   },
 };

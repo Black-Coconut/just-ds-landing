@@ -1,7 +1,6 @@
 /* All page copy, per language. **text** renders as <strong>.
-   The page flow follows the Pro-DS product page (hero → intro + quote → feature blocks →
-   awards → key features → information → bundles) and parodies each block. */
-import { PRO_DS_PRICE, VERSION } from "./site";
+   Korean is served at /ko, English at /en; "/" redirects to one of them (proxy.ts). */
+import { VERSION } from "./site";
 
 export type Lang = "ko" | "en";
 export type PathKey = "sib" | "click" | "breath";
@@ -18,7 +17,7 @@ export type Dict = {
   meta: { title: string; description: string; ogTitle: string; ogDescription: string; ogImage: string; ogImageAlt: string; ogLocale: string; ogLocaleAlt: string };
   skip: string;
   nav: { aria: string; features: string; compare: string; download: string; faq: string; shop: string; shopAria: string };
-  langSwitch: { href: string; hreflang: Lang; html: [string, string] };
+  langToggle: { aria: string };
   headerCta: string;
   hero: {
     eyebrow: string; h1Extra: string; tagline: string; claim: [string, string, string];
@@ -30,8 +29,7 @@ export type Dict = {
   detection: { eyebrow: string; title: string; lede: string; cards: Card[] };
   demo: { title: string; note: string; canvasLabel: string; knobs: Record<PathKey, { label: string; aria: string }> };
   blocks: Block[];
-  compare: { eyebrow: string; title: string; lede: string; caption: string; cols: [string, string, string]; priceLabel: string; extraBadge: string; rows: Row[]; footnote: string };
-  awards: { title: string; note: string; badges: { top: string; main: string; bottom: string }[] };
+  compare: { eyebrow: string; title: string; lede: string; caption: string; cols: [string, string, string]; extraBadge: string; rows: Row[]; footnote: string };
   keyFeatures: { eyebrow: string; title: string; items: string[] };
   download: { eyebrow: string; title: string; lede: string; soonLabel: string; soonNote: string; cards: Dl[]; versionLine: string };
   info: { title: string; blocks: { title: string; lines: string[] }[] };
@@ -47,29 +45,29 @@ const YES_KO = "지원", NO_KO = "없음";
 
 export const ko: Dict = {
   lang: "ko",
-  path: "/",
+  path: "/ko",
   meta: {
-    title: "Just-DS — 무료 디에서 VST3·AU | 치찰음·클릭·숨소리 제거, Pro-DS 무료 대안",
+    title: "Just-DS by Volta — 무료 디에서 VST3·AU | 치찰음·클릭·숨소리 제거, Pro-DS 무료 대안",
     description:
       "Just-DS는 치찰음(ㅅ·ㅆ·ㅊ)에 클릭·입소리(ㅌ)와 숨소리(ㅎ) 제거까지 하는 무료 디에서 플러그인입니다. Single Vocal/Allround, Split/Wide, Lookahead, Mid/Side, 4배 오버샘플링. Windows·macOS VST3/AU.",
-    ogTitle: `Just-DS — ${PRO_DS_PRICE} 디에서가 하는 일, 무료로`,
+    ogTitle: "Just-DS — 무료 디에서. 치찰음·클릭·숨소리까지",
     ogDescription: "치찰음은 기본, Pro-DS엔 없는 클릭·입소리·숨소리 제거까지. 구독·계정·체험 기간 없는 무료 VST3/AU 디에서.",
     ogImage: "/og/og-ko.png",
-    ogImageAlt: `혀를 내민 금색 노브와 Just-DS 플러그인 화면, ${PRO_DS_PRICE} 대신 $0`,
+    ogImageAlt: "혀를 내민 금색 노브와 Just-DS 플러그인 화면, 평생 무료",
     ogLocale: "ko_KR",
     ogLocaleAlt: "en_US",
   },
   skip: "본문으로 건너뛰기",
   nav: { aria: "주요 메뉴", features: "기능", compare: "비교", download: "다운로드", faq: "FAQ", shop: "Shop", shopAria: "Shop — 살 게 없습니다" },
-  langSwitch: { href: "/en", hreflang: "en", html: ["KO", "EN"] },
+  langToggle: { aria: "언어 선택" },
   headerCta: "무료 다운로드",
   hero: {
     eyebrow: "무료 디에서 플러그인 · VST3 / AU",
     h1Extra: " — 무료 디에서 플러그인",
-    tagline: "똑똑하고, 투명하고, 공짜.",
+    tagline: "돈 안 받습니다. 진짜로.",
     claim: ["Pro-DS가 하는 일 그대로.", "입소리·숨소리까지 더해서.", "가격은"],
     priceAria: "가격 비교",
-    priceNote: "FabFilter Pro-DS 공식 정가 대비 · 2026년 11월 기준",
+    priceNote: "평생 무료 · 구독·계정·체험 기간 없음",
     ctaPrimary: "무료 다운로드",
     ctaTrialOld: "30일 체험판",
     ctaTrialNew: "평생 체험판",
@@ -77,17 +75,17 @@ export const ko: Dict = {
     meta: ["Windows · macOS", "VST3 · AU", "한국어 / English UI"],
     img: "/assets/img/ui-auto-ko.webp",
     imgAlt: "Just-DS 플러그인 메인 화면: 치찰·클릭·숨소리 감쇄를 보여주는 파형 디스플레이와 혀를 내민 금색 노브 세 개",
-    badge: "-100%",
+    badge: "FREE",
   },
   ticker: ["Free forever", "치찰음", "클릭", "숨소리", "No subscription", "No account", "No trial", "$0.00"],
   intro: {
-    title: "똑똑하고 투명하게. 그리고 공짜로.",
+    title: "공짜입니다. 조건 없이.",
     body: [
       "좋은 마이크와 프리앰프로 녹음해도, 컴프레서와 새츄레이션을 거치고 나면 ㅅ 소리가 귀를 찌릅니다. 입술이 붙었다 떨어지는 쩝 소리와 숨소리도 같이 커집니다.",
-      "걱정 마세요. **Just-DS가 구하러 왔습니다. 공짜로.**",
+      "걱정 마세요. **Just-DS가 다 잡아 줍니다. 공짜로.**",
     ],
-    quote: `${PRO_DS_PRICE} 아꼈다.`,
-    quoteBy: "당신의 지갑",
+    quote: "Pro-DS 살 필요가 없어졌다.",
+    quoteBy: "사용자 후기",
   },
   detection: {
     eyebrow: "Accurate detection ×3",
@@ -138,12 +136,11 @@ export const ko: Dict = {
     },
   ],
   compare: {
-    eyebrow: `${PRO_DS_PRICE} vs $0`,
-    title: "틀린 그림 찾기. 가격 말고는 없습니다.",
+    eyebrow: "Pro-DS vs Just-DS",
+    title: "기능은 그대로. 거기에 더.",
     lede: "Pro-DS의 핵심 기능은 그대로 갖췄고, 없는 기능을 더했습니다. 직접 비교해 보세요.",
     caption: "FabFilter Pro-DS와 Just-DS 기능 비교",
     cols: ["기능", "FabFilter Pro-DS", "Just-DS"],
-    priceLabel: "가격",
     extraBadge: "추가",
     rows: [
       { label: "치찰음 제거", them: YES_KO, us: YES_KO },
@@ -160,18 +157,7 @@ export const ko: Dict = {
       { label: "한국어 UI", them: NO_KO, us: YES_KO, extra: true },
     ],
     footnote:
-      "Pro-DS 항목은 FabFilter 공식 제품 페이지의 기능 목록과 공식 스토어 정가(USD, 세금 별도)를 기준으로 2026년 11월에 확인했습니다. 할인 행사 중에는 판매가가 다를 수 있습니다. FabFilter와 Pro-DS는 FabFilter Software Instruments의 상표이며, Just-DS는 FabFilter와 아무 관련이 없습니다.",
-  },
-  awards: {
-    title: "Awards",
-    note: "아직 없습니다. 나온 지 얼마 안 됐거든요. 대신 이런 건 있습니다.",
-    badges: [
-      { top: "가격", main: "$0", bottom: "영원히" },
-      { top: "구독", main: "없음", bottom: "월 0원" },
-      { top: "계정", main: "없음", bottom: "가입 안 함" },
-      { top: "체험 기간", main: "∞", bottom: "끝나지 않음" },
-      { top: "혀", main: "3개", bottom: "노브마다" },
-    ],
+      "Pro-DS 항목은 FabFilter 공식 제품 페이지의 기능 목록을 기준으로 2026년 11월에 확인했습니다. FabFilter와 Pro-DS는 FabFilter Software Instruments의 상표이며, Just-DS는 FabFilter와 아무 관련이 없습니다.",
   },
   keyFeatures: {
     eyebrow: "Key features",
@@ -198,7 +184,7 @@ export const ko: Dict = {
       "한국어 / English UI",
       "네트워크 요청·계정·업로드 없음",
       "Windows VST3, macOS VST3 · AU",
-      `그리고 가격 $0 (Pro-DS 정가 ${PRO_DS_PRICE})`,
+      "그리고 영원히 무료",
     ],
   },
   download: {
@@ -236,20 +222,20 @@ export const ko: Dict = {
     title: "자주 묻는 질문",
     items: [
       { q: "정말 무료인가요?", a: "네. 구독, 계정, 체험 기간, 기능 제한이 없습니다. 내려받아서 쓰면 끝입니다." },
-      { q: "왜 무료예요?", a: `보컬의 ㅅ 소리 하나 정리하는 데 ${PRO_DS_PRICE}를 내는 건 너무하다고 생각했습니다. 그래서 더 많이 하는 걸 만들고, 값은 받지 않기로 했습니다.` },
-      { q: "FabFilter와 관련이 있나요?", a: "아니요. Just-DS는 Volta가 직접 만든 플러그인이며 FabFilter와 제휴, 후원, 보증 관계가 없습니다. 화면과 이 페이지는 Pro-DS를 패러디한 디자인이고, 모든 그래픽과 코드는 직접 만들었습니다." },
+      { q: "왜 무료예요?", a: "보컬 정리에 돈을 낼 필요는 없다고 생각했습니다. 그래서 더 많이 하는 걸 만들고, 값은 받지 않기로 했습니다." },
+      { q: "FabFilter와 관련이 있나요?", a: "아니요. Just-DS는 Volta가 직접 만든 플러그인이며 FabFilter와 제휴, 후원, 보증 관계가 없습니다. 화면은 Pro-DS를 패러디한 디자인이고, 모든 그래픽과 코드는 직접 만들었습니다." },
       { q: "어떤 DAW에서 쓸 수 있나요?", a: "VST3 또는 AU를 지원하는 64비트 DAW에서 쓸 수 있습니다. Windows는 VST3, macOS는 VST3와 AU를 제공합니다. Pro Tools용 AAX는 아직 지원하지 않습니다." },
       { q: "지연(레이턴시)이 있나요?", a: "LOOKAHEAD를 켜면 정밀 분석을 위해 150 ms의 지연을 DAW에 알리고, DAW가 자동으로 보상합니다. 녹음하면서 모니터링할 때는 LOOKAHEAD를 끄면 지연 0 ms로 동작합니다." },
       { q: "영어 보컬에도 쓸 수 있나요?", a: "네. 한국어 보컬로 다듬었지만 s, sh, ch 같은 치찰음과 t 클릭, h 숨소리는 영어에서도 같은 성격의 소리라 그대로 잡습니다." },
       { q: "오디오가 외부로 전송되나요?", a: "아니요. 모든 처리는 컴퓨터 안에서만 이루어집니다. 네트워크 요청, 계정, 업로드가 없습니다." },
     ],
   },
-  final: { title: `${PRO_DS_PRICE} 아끼고, 마이크 케이블이나 사세요.`, lede: "치찰음, 클릭, 숨소리. 노브 세 개로 끝.", cta: "Just-DS 무료 다운로드" },
+  final: { title: "돈 낼 필요 없습니다. 그냥 가져가세요.", lede: "치찰음, 클릭, 숨소리. 노브 세 개로 끝.", cta: "Just-DS 무료 다운로드" },
   footer: {
     aria: "하단 메뉴",
     otherLang: { href: "/en", hreflang: "en", label: "English" },
     legal:
-      "FabFilter와 Pro-DS는 FabFilter Software Instruments B.V.의 상표입니다. Just-DS는 독립적으로 개발한 제품이며 FabFilter와 제휴, 후원, 보증 관계가 없습니다. 이 페이지는 Pro-DS 제품 페이지를 패러디했으며, 비교 내용은 공개된 정보를 바탕으로 작성했습니다. VST는 Steinberg Media Technologies GmbH의 상표이며, Audio Units와 macOS는 Apple Inc.의 상표입니다.",
+      "FabFilter와 Pro-DS는 FabFilter Software Instruments B.V.의 상표입니다. Just-DS는 독립적으로 개발한 제품이며 FabFilter와 제휴, 후원, 보증 관계가 없습니다. 비교 내용은 공개된 정보를 바탕으로 작성했습니다. VST는 Steinberg Media Technologies GmbH의 상표이며, Audio Units와 macOS는 Apple Inc.의 상표입니다.",
   },
   hint: { lang: "en", text: "Looking for English?", link: "Read it in English →", href: "/en", close: "Close" },
   schema: {
@@ -267,27 +253,27 @@ export const en: Dict = {
   lang: "en",
   path: "/en",
   meta: {
-    title: "Just-DS — Free De-esser VST3 / AU | Free Pro-DS Alternative with Click & Breath Removal",
+    title: "Just-DS by Volta — Free De-esser VST3 / AU | Free Pro-DS Alternative with Click & Breath Removal",
     description:
       "Just-DS is a free de-esser plugin that tames sibilance and also removes mouth clicks, plosive t's and breaths. Single Vocal/Allround, Split/Wide, lookahead, mid/side, 4x oversampling. VST3/AU for Windows and macOS.",
-    ogTitle: `Just-DS — Does what a ${PRO_DS_PRICE} de-esser does. For $0.`,
+    ogTitle: "Just-DS — The free de-esser. Sibilance, clicks and breaths.",
     ogDescription: "Sibilance, plus the mouth clicks and breaths Pro-DS doesn't touch. A free VST3/AU de-esser: no subscription, no account, no trial.",
     ogImage: "/og/og-en.png",
-    ogImageAlt: `A gold knob sticking its tongue out next to the Just-DS plugin, ${PRO_DS_PRICE} crossed out, $0`,
+    ogImageAlt: "A gold knob sticking its tongue out next to the Just-DS plugin, free forever",
     ogLocale: "en_US",
     ogLocaleAlt: "ko_KR",
   },
   skip: "Skip to content",
   nav: { aria: "Main", features: "Features", compare: "Compare", download: "Download", faq: "FAQ", shop: "Shop", shopAria: "Shop — nothing to buy" },
-  langSwitch: { href: "/", hreflang: "ko", html: ["KO", "EN"] },
+  langToggle: { aria: "Language" },
   headerCta: "Free download",
   hero: {
     eyebrow: "Free de-esser plugin · VST3 / AU",
     h1Extra: " — free de-esser plugin",
-    tagline: "Intelligent, transparent and free.",
+    tagline: "Free. Really.",
     claim: ["Everything Pro-DS does.", "Plus clicks & breaths.", "For"],
     priceAria: "Price comparison",
-    priceNote: "vs. FabFilter Pro-DS list price · November 2026",
+    priceNote: "Free forever · no subscription, account or trial",
     ctaPrimary: "Free download",
     ctaTrialOld: "30-day trial",
     ctaTrialNew: "Forever trial",
@@ -295,17 +281,17 @@ export const en: Dict = {
     meta: ["Windows · macOS", "VST3 · AU", "English / Korean UI"],
     img: "/assets/img/ui-auto-en.webp",
     imgAlt: "Just-DS main screen: a waveform display showing sibilance, click and breath reduction, and three gold knobs sticking their tongues out",
-    badge: "-100%",
+    badge: "FREE",
   },
   ticker: ["Free forever", "Sibilance", "Clicks", "Breaths", "No subscription", "No account", "No trial", "$0.00"],
   intro: {
-    title: "Intelligent and transparent. And free.",
+    title: "Free. No strings attached.",
     body: [
       "Even with great mics and pre-amps, compression and saturation push sibilance in your face. Lip smacks and breaths come up with it.",
       "But don't worry. **Just-DS comes to the rescue. For free.**",
     ],
-    quote: `I just saved ${PRO_DS_PRICE}.`,
-    quoteBy: "Your wallet",
+    quote: "No need to buy Pro-DS anymore.",
+    quoteBy: "User review (translated from Korean)",
   },
   detection: {
     eyebrow: "Accurate detection ×3",
@@ -356,12 +342,11 @@ export const en: Dict = {
     },
   ],
   compare: {
-    eyebrow: `${PRO_DS_PRICE} vs $0`,
-    title: "Spot the difference. Hint: it's the price.",
+    eyebrow: "Pro-DS vs Just-DS",
+    title: "Same features. Plus more.",
     lede: "Every core Pro-DS feature is here, plus the ones it never had. See for yourself.",
     caption: "Feature comparison: FabFilter Pro-DS vs Just-DS",
     cols: ["Feature", "FabFilter Pro-DS", "Just-DS"],
-    priceLabel: "Price",
     extraBadge: "Extra",
     rows: [
       { label: "Sibilance removal", them: "Yes", us: "Yes" },
@@ -377,18 +362,7 @@ export const en: Dict = {
       { label: "Learns the voice and sets itself up (LEARN)", them: "No", us: "Yes", extra: true },
     ],
     footnote:
-      "Pro-DS details are taken from FabFilter's official product page feature list and the official store list price (USD, excluding tax), checked in November 2026. Sale prices may differ. FabFilter and Pro-DS are trademarks of FabFilter Software Instruments; Just-DS is not affiliated with FabFilter in any way.",
-  },
-  awards: {
-    title: "Awards",
-    note: "None yet. We only just shipped. Here's what we do have.",
-    badges: [
-      { top: "Price", main: "$0", bottom: "forever" },
-      { top: "Subscription", main: "None", bottom: "$0 / month" },
-      { top: "Account", main: "None", bottom: "no sign-up" },
-      { top: "Trial", main: "∞", bottom: "never ends" },
-      { top: "Tongues", main: "3", bottom: "one per knob" },
-    ],
+      "Pro-DS details are taken from the feature list on FabFilter's official product page, checked in November 2026. FabFilter and Pro-DS are trademarks of FabFilter Software Instruments; Just-DS is not affiliated with FabFilter in any way.",
   },
   keyFeatures: {
     eyebrow: "Key features",
@@ -415,7 +389,7 @@ export const en: Dict = {
       "English / Korean UI",
       "No network requests, no account, no uploads",
       "VST3 on Windows, VST3 and AU on macOS",
-      `And it costs $0 (Pro-DS list price: ${PRO_DS_PRICE})`,
+      "And it's free. Forever.",
     ],
   },
   download: {
@@ -453,22 +427,22 @@ export const en: Dict = {
     title: "Questions",
     items: [
       { q: "Is it really free?", a: "Yes. No subscription, no account, no trial period and nothing locked. Download it and use it." },
-      { q: "Why is it free?", a: `Because ${PRO_DS_PRICE} to tame a few S's felt like too much. So we built one that does more, and decided not to charge for it.` },
-      { q: "Is it affiliated with FabFilter?", a: "No. Just-DS is made by Volta and is not affiliated with, sponsored or endorsed by FabFilter. The plugin interface and this page are a parody of Pro-DS, and every graphic and line of code is our own." },
+      { q: "Why is it free?", a: "We don't think cleaning up a vocal should cost money. So we built one that does more, and decided not to charge for it." },
+      { q: "Is it affiliated with FabFilter?", a: "No. Just-DS is made by Volta and is not affiliated with, sponsored or endorsed by FabFilter. The interface is a parody of Pro-DS, and every graphic and line of code is our own." },
       { q: "Which DAWs does it work in?", a: "Any 64-bit DAW that hosts VST3 or AU. Windows gets VST3; macOS gets VST3 and AU. AAX for Pro Tools isn't supported yet." },
       { q: "Does it add latency?", a: "With LOOKAHEAD on, it reports 150 ms to the DAW for precise analysis, and the DAW compensates automatically. Turn LOOKAHEAD off while tracking and it runs at zero latency." },
       { q: "Does it work on English vocals?", a: "Yes. It was tuned on Korean vocals, but s, sh and ch sibilance, t clicks and h breaths are the same kinds of sound in English, and it catches them the same way." },
       { q: "Does my audio leave my computer?", a: "No. Everything runs locally. No network requests, no account, no uploads." },
     ],
   },
-  final: { title: `Keep the ${PRO_DS_PRICE}. Buy a better mic cable.`, lede: "Sibilance, clicks, breaths. Three knobs and you're done.", cta: "Download Just-DS free" },
+  final: { title: "Don't pay for it. Just take it.", lede: "Sibilance, clicks, breaths. Three knobs and you're done.", cta: "Download Just-DS free" },
   footer: {
     aria: "Footer",
-    otherLang: { href: "/", hreflang: "ko", label: "한국어" },
+    otherLang: { href: "/ko", hreflang: "ko", label: "한국어" },
     legal:
-      "FabFilter and Pro-DS are trademarks of FabFilter Software Instruments B.V. Just-DS is an independent product and is not affiliated with, sponsored or endorsed by FabFilter. This page is a parody of the Pro-DS product page; comparisons are based on publicly available information. VST is a trademark of Steinberg Media Technologies GmbH. Audio Units and macOS are trademarks of Apple Inc.",
+      "FabFilter and Pro-DS are trademarks of FabFilter Software Instruments B.V. Just-DS is an independent product and is not affiliated with, sponsored or endorsed by FabFilter. Comparisons are based on publicly available information. VST is a trademark of Steinberg Media Technologies GmbH. Audio Units and macOS are trademarks of Apple Inc.",
   },
-  hint: { lang: "ko", text: "한국어로 보시겠어요?", link: "한국어 페이지 →", href: "/", close: "닫기" },
+  hint: { lang: "ko", text: "한국어로 보시겠어요?", link: "한국어 페이지 →", href: "/ko", close: "닫기" },
   schema: {
     pageName: "Just-DS — Free De-esser VST3 / AU",
     description: "A free de-esser VST3/AU plugin that finds and reduces sibilance, mouth clicks and breaths separately.",

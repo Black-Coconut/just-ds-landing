@@ -49,6 +49,7 @@ button { font: inherit; color: inherit; }
 :focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; border-radius: 4px; }
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
 .wrap { width: min(100% - 32px, var(--wrap)); margin-inline: auto; }
+.nowrap { white-space: nowrap; }
 .svg-sprite { position: absolute; width: 0; height: 0; overflow: hidden; }
 
 /* ---------- type ---------- */
@@ -81,7 +82,7 @@ p { margin: 0 0 1em; }
 .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; }
 .brand svg { width: 38px; height: 38px; filter: drop-shadow(0 2px 3px rgb(0 0 0 / .6)); }
 .brand-text { display: flex; flex-direction: column; line-height: 1; }
-.brand-maker { font-family: var(--font-display); font-weight: 600; font-size: 11px; letter-spacing: .12em; color: var(--text-2); }
+.brand-maker { font-family: var(--font-display); font-weight: 600; font-size: 11px; letter-spacing: .14em; color: var(--text-2); margin-top: 2px; }
 .brand-name { font-family: var(--font-display); font-weight: 800; font-size: 26px; color: var(--lime); letter-spacing: .01em; }
 .nav { display: flex; gap: 26px; margin-left: auto; }
 .nav a {
@@ -92,12 +93,23 @@ p { margin: 0 0 1em; }
 .nav a:hover { color: var(--text); }
 .nav-shop s { text-decoration-color: var(--led); text-decoration-thickness: 2px; }
 .header-actions { display: flex; align-items: center; gap: 14px; }
-.lang-switch {
-  font-family: var(--font-display); font-weight: 600; font-size: 15px; letter-spacing: .08em;
-  text-decoration: none; color: var(--muted); padding: 6px 4px;
+.lang-toggle {
+  display: inline-flex; padding: 3px; gap: 3px; border-radius: 7px;
+  background: #0e0f11; border: 1px solid #000; box-shadow: 0 1px 0 rgb(255 255 255 / .05);
 }
-.lang-switch b { color: var(--text); font-weight: 700; }
-.lang-switch:hover { color: var(--text); }
+.lang-toggle a {
+  position: relative; display: inline-flex; align-items: center; min-height: 30px; padding: 0 10px 0 15px;
+  border-radius: 4px; border: 1px solid #0b0b0c; background: linear-gradient(#2c2d32, #202125);
+  font-family: var(--font-display); font-weight: 700; font-size: 14px; letter-spacing: .08em;
+  text-decoration: none; color: var(--muted); transition: color .15s;
+}
+.lang-toggle a::before {
+  content: ""; position: absolute; left: 6px; top: 50%; translate: 0 -50%;
+  width: 3px; height: 12px; border-radius: 2px; background: #3d3f44;
+}
+.lang-toggle a:hover { color: var(--text); }
+.lang-toggle a[aria-current="page"] { color: var(--text); background: linear-gradient(#3b3c42, #2a2b30); }
+.lang-toggle a[aria-current="page"]::before { background: var(--gold); box-shadow: 0 0 8px var(--gold); }
 
 /* ---------- buttons: plugin-style dark keys with an LED bar ---------- */
 .btn {
@@ -145,6 +157,12 @@ p { margin: 0 0 1em; }
   margin: 0 0 6px; color: var(--text); text-shadow: 0 6px 24px rgb(0 0 0 / .5);
 }
 .hero-title .dot { color: var(--gold); font-weight: 700; }
+.hero-by {
+  font-family: var(--font-display); font-weight: 600; font-size: clamp(16px, 1.5vw, 21px);
+  letter-spacing: .2em; text-transform: uppercase; color: var(--text-2); margin: 8px 0 18px;
+}
+.hero-by a { color: var(--text); font-weight: 800; text-decoration: none; }
+.hero-by a:hover { color: var(--gold); }
 .hero-tagline {
   font-family: var(--font-display); font-weight: 600; font-size: clamp(22px, 2.2vw, 30px);
   color: var(--gold); letter-spacing: .02em; margin: 0 0 22px;
@@ -175,12 +193,6 @@ p { margin: 0 0 1em; }
 .hero .lede strong { color: var(--text); }
 .hero-ctas { display: flex; flex-wrap: wrap; gap: 14px; margin-bottom: 28px; }
 .price-row { display: flex; align-items: center; flex-wrap: wrap; gap: 12px 18px; margin-bottom: 24px; font-family: var(--font-display); }
-.price-old { font-size: 30px; font-weight: 600; color: var(--muted); position: relative; }
-.price-old::after {
-  content: ""; position: absolute; left: -6%; right: -6%; top: 52%; height: 4px; background: var(--led);
-  transform: rotate(-9deg); border-radius: 2px; box-shadow: 0 0 10px rgb(255 59 48 / .7);
-}
-.price-arrow { color: var(--muted); font-size: 24px; }
 .price-new { font-size: 44px; font-weight: 800; color: var(--lime); text-shadow: 0 0 24px rgb(166 220 42 / .35); }
 .price-note { font-family: var(--font-body); font-size: 13px; color: var(--muted); }
 .hero-meta { display: flex; flex-wrap: wrap; gap: 8px; padding: 0; margin: 0; list-style: none; }
@@ -364,21 +376,6 @@ p { margin: 0 0 1em; }
 .row-media img { width: 100%; height: auto; aspect-ratio: 900 / 598; }
 .row-media figcaption { color: var(--muted); margin-top: 12px; font-size: 14px; }
 
-/* ---------- awards ---------- */
-.awards-section .section-head { margin-bottom: 30px; }
-.awards { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 22px; }
-.award {
-  width: 138px; aspect-ratio: 1; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center;
-  text-align: center; gap: 2px; padding: 12px;
-  background: radial-gradient(circle at 35% 28%, #3a3b41, #1d1e21 70%);
-  border: 2px solid var(--gold); box-shadow: 0 0 0 5px #121315, 0 0 0 6px rgb(255 194 26 / .35), var(--shadow);
-}
-.award:nth-child(odd) { rotate: -5deg; }
-.award:nth-child(even) { rotate: 4deg; }
-.award-top, .award-bottom { font-family: var(--font-display); font-weight: 600; font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: var(--text-2); }
-:lang(ko) .award-top, :lang(ko) .award-bottom { letter-spacing: 0; }
-.award-main { font-family: var(--font-display); font-weight: 800; font-size: 38px; line-height: 1; color: var(--gold); }
-
 /* ---------- key features ---------- */
 .kf-list { list-style: none; counter-reset: kf; padding: 0; margin: 0; columns: 2; column-gap: 56px; }
 .kf-list li {
@@ -485,8 +482,6 @@ p { margin: 0 0 1em; }
   .hero-knob { width: 128px; left: auto; right: -4px; bottom: -22%; }
   .kf-list { columns: 1; }
   .bundles { grid-template-columns: 1fr; }
-  .award { width: 112px; }
-  .award-main { font-size: 30px; }
   .compare-wrap { padding: 4px; }
   .compare { min-width: 0; }
   .compare th, .compare td { padding: 12px 8px; }
