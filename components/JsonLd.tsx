@@ -5,7 +5,9 @@ import { DOWNLOADS, SITE_URL, VERSION } from "@/lib/site";
     the plugin (free offer, features, keywords), publisher, website, this page, and every Q&A shown on the page. */
 export default function JsonLd({ t }: { t: Dict }) {
   const pageUrl = SITE_URL + t.path;
-  const downloads = Object.values(DOWNLOADS).filter(Boolean);
+  const downloads = Object.values(DOWNLOADS)
+    .filter(Boolean)
+    .map((u) => (u.startsWith("http") ? u : SITE_URL + u));
   const modified = new Date().toISOString().slice(0, 10); // build date
 
   const data = {

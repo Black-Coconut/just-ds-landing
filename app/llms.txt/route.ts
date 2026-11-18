@@ -9,7 +9,9 @@ const facts = (t: Dict) => t.guide.facts.map((f) => `- ${f.k}: ${f.v}`);
 const qa = (items: { q: string; a: string }[]) => items.flatMap((f) => [`### ${f.q}`, f.a, ""]);
 
 export function GET() {
-  const downloads = Object.entries(DOWNLOADS).filter(([, url]) => url);
+  const downloads = Object.entries(DOWNLOADS)
+    .filter(([, url]) => url)
+    .map(([p, url]) => [p, url.startsWith("http") ? url : SITE_URL + url] as const);
   const lines = [
     "# Just-DS — free de-esser plugin by Volta",
     "",
