@@ -72,3 +72,19 @@ JSON-LD(무료 Offer, 기능 목록, FAQ), hreflang 포함 sitemap, robots, 파�
 Pro-DS 항목은 FabFilter 공식 제품 페이지 기능 목록을 2026-11-17에 확인한 것이다.
 가격 비교는 하지 않는다 — 페이지는 무료라는 점만 강조한다. 기능이 바뀌면 `lib/content.ts`의 비교표를 고친다.
 상표 고지(페이지 하단)는 지우지 않는다.
+
+## SEO / GEO
+
+타깃 검색어는 **free de-esser**, **plosive removal**, **breath removal**(한국어: 무료 디에서, 파열음 제거, 숨소리·후음 제거)이고, 영어를 우선한다.
+
+| 무엇 | 어디 |
+|---|---|
+| 페이지 제목·설명·키워드 | `lib/content.ts`의 `meta` |
+| 화면에 보이는 H1(키워드 + 제품명) | 히어로의 `eyebrow` + "Just-DS" |
+| "How it works" 섹션: 한눈에 보는 사실 목록 + 질문형 소제목과 바로 답하는 문단 | `lib/content.ts`의 `guide` |
+| 구조화 데이터: SoftwareApplication(무료 Offer), Organization, WebSite, WebPage, FAQPage(How it works + FAQ) | `components/JsonLd.tsx` |
+| AI 답변 엔진용 요약 `/llms.txt` (영어 → 한국어 요약, 페이지 문구에서 자동 생성) | `app/llms.txt/route.ts` |
+| robots: 전체 허용 + AI 크롤러(GPTBot, ClaudeBot, PerplexityBot, Google-Extended 등) 명시 | `app/robots.ts` |
+| sitemap: /en 우선, /ko, /llms.txt, hreflang + x-default | `app/sitemap.ts` |
+
+다운로드 링크를 넣으면 JSON-LD의 Offer가 `PreOrder`에서 `InStock`으로 바뀌고 `downloadUrl`이 추가된다.

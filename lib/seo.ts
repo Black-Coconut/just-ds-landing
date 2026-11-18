@@ -14,13 +14,12 @@ export function buildMetadata(t: Dict): Metadata {
     description: t.meta.description,
     applicationName: "Just-DS",
     authors: [{ name: "Volta", url: "https://voltamix.studio" }],
-    keywords:
-      t.lang === "ko"
-        ? ["디에서", "무료 디에서", "디에서 플러그인", "치찰음 제거", "숨소리 제거", "입소리 제거", "클릭 제거", "Pro-DS 대안", "무료 VST", "보컬 믹싱"]
-        : ["de-esser", "free de-esser", "de-esser VST", "free Pro-DS alternative", "breath remover", "mouth click remover", "sibilance", "free VST3", "vocal mixing"],
+    keywords: t.meta.keywords,
+    category: "music software",
     alternates: {
       canonical: t.path,
-      languages: { ko: "/ko", en: "/en", "x-default": "/" },
+      languages: { en: "/en", ko: "/ko", "x-default": "/" },
+      types: { "text/plain": "/llms.txt" },
     },
     openGraph: {
       type: "website",

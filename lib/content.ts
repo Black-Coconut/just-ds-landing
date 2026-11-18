@@ -14,19 +14,20 @@ type Qa = { q: string; a: string };
 export type Dict = {
   lang: Lang;
   path: string;
-  meta: { title: string; description: string; ogTitle: string; ogDescription: string; ogImage: string; ogImageAlt: string; ogLocale: string; ogLocaleAlt: string };
+  meta: { title: string; description: string; keywords: string[]; ogTitle: string; ogDescription: string; ogImage: string; ogImageAlt: string; ogLocale: string; ogLocaleAlt: string };
   skip: string;
   nav: { aria: string; features: string; compare: string; download: string; faq: string; shop: string; shopAria: string };
   langToggle: { aria: string };
   headerCta: string;
   hero: {
-    eyebrow: string; h1Extra: string; tagline: string; claim: [string, string, string];
+    eyebrow: string; tagline: string; claim: [string, string, string];
     priceAria: string; priceNote: string; ctaPrimary: string; ctaTrialOld: string; ctaTrialNew: string;
     metaAria: string; meta: string[]; img: string; imgAlt: string; badge: string;
   };
   ticker: string[];
   intro: { title: string; body: string[]; quote: string; quoteBy: string };
   detection: { eyebrow: string; title: string; lede: string; cards: Card[] };
+  guide: { eyebrow: string; title: string; lede: string; factsTitle: string; facts: { k: string; v: string }[]; items: Qa[] };
   demo: { title: string; note: string; canvasLabel: string; knobs: Record<PathKey, { label: string; aria: string }> };
   blocks: Block[];
   compare: { eyebrow: string; title: string; lede: string; caption: string; cols: [string, string, string]; extraBadge: string; rows: Row[]; footnote: string };
@@ -47,11 +48,12 @@ export const ko: Dict = {
   lang: "ko",
   path: "/ko",
   meta: {
-    title: "Just-DS by Volta — 무료 디에서 VST3·AU | 치찰음·클릭·숨소리 제거, Pro-DS 무료 대안",
+    title: "무료 디에서 플러그인 Just-DS | 치찰음·파열음·숨소리(후음) 제거 VST3/AU",
     description:
-      "Just-DS는 치찰음(ㅅ·ㅆ·ㅊ)에 클릭·입소리(ㅌ)와 숨소리(ㅎ) 제거까지 하는 무료 디에서 플러그인입니다. Single Vocal/Allround, Split/Wide, Lookahead, Mid/Side, 4배 오버샘플링. Windows·macOS VST3/AU.",
-    ogTitle: "Just-DS — 무료 디에서. 치찰음·클릭·숨소리까지",
-    ogDescription: "치찰음은 기본, Pro-DS엔 없는 클릭·입소리·숨소리 제거까지. 구독·계정·체험 기간 없는 무료 VST3/AU 디에서.",
+      "Just-DS는 보컬의 치찰음, ㅌ 파열음·입소리, 숨소리·후음(ㅎ)을 따로 찾아 줄이는 무료 디에서 플러그인입니다. Windows·macOS VST3/AU, 구독·계정 없이 평생 무료. Pro-DS 무료 대안.",
+    keywords: ["무료 디에서", "디에서 플러그인", "무료 디에서 플러그인", "치찰음 제거", "파열음 제거", "숨소리 제거", "후음 제거", "입소리 제거", "보컬 숨소리 제거 플러그인", "Pro-DS 무료 대안", "free de-esser"],
+    ogTitle: "Just-DS — 파열음·숨소리까지 잡는 무료 디에서",
+    ogDescription: "치찰음, ㅌ 파열음·입소리, 숨소리·후음(ㅎ)을 따로 잡는 무료 VST3/AU 디에서. Windows·macOS, 구독·계정 없이 평생 무료.",
     ogImage: "/og/og-ko.png",
     ogImageAlt: "혀를 내민 금색 노브와 Just-DS 플러그인 화면, 평생 무료",
     ogLocale: "ko_KR",
@@ -62,10 +64,9 @@ export const ko: Dict = {
   langToggle: { aria: "언어 선택" },
   headerCta: "무료 다운로드",
   hero: {
-    eyebrow: "무료 디에서 플러그인 · VST3 / AU",
-    h1Extra: " — 무료 디에서 플러그인",
+    eyebrow: "무료 디에서 · 파열음·숨소리 제거 플러그인",
     tagline: "돈 안 받습니다. 진짜로.",
-    claim: ["Pro-DS가 하는 일 그대로.", "입소리·숨소리까지 더해서.", "가격은"],
+    claim: ["Pro-DS가 하는 일 그대로.", "파열음·숨소리까지 더해서.", "가격은"],
     priceAria: "가격 비교",
     priceNote: "평생 무료 · 구독·계정·체험 기간 없음",
     ctaPrimary: "무료 다운로드",
@@ -77,7 +78,7 @@ export const ko: Dict = {
     imgAlt: "Just-DS 플러그인 메인 화면: 치찰·클릭·숨소리 감쇄를 보여주는 파형 디스플레이와 혀를 내민 금색 노브 세 개",
     badge: "FREE",
   },
-  ticker: ["Free forever", "치찰음", "클릭", "숨소리", "No subscription", "No account", "No trial", "$0.00"],
+  ticker: ["Free forever", "치찰음", "파열음", "숨소리", "No subscription", "No account", "No trial", "$0.00"],
   intro: {
     title: "공짜입니다. 조건 없이.",
     body: [
@@ -89,8 +90,8 @@ export const ko: Dict = {
   },
   detection: {
     eyebrow: "Accurate detection ×3",
-    title: "정확한 검출. 그것도 세 군데서.",
-    lede: "보컬 한 줄에는 Single Vocal, 드럼이나 믹스 전체에는 Allround. 여기까지는 익숙하죠. Just-DS는 클릭과 숨소리를 찾는 검출기가 하나씩 더 있습니다. 노브도 셋, 혀도 셋.",
+    title: "치찰음, 파열음, 숨소리. 따로 잡습니다.",
+    lede: "보컬 한 줄에는 Single Vocal, 드럼이나 믹스 전체에는 Allround. 여기에 일반 디에서에는 없는 검출기가 둘 더 있습니다. ㅌ 파열음·입소리용 하나, 숨소리·후음(ㅎ)용 하나. 노브도 셋, 혀도 셋.",
     cards: [
       {
         path: "sib", tag: "Pro-DS도 함", tagNew: false, title: "Sibilance", sub: "치찰·파찰음 — ㅅ · ㅆ · 거친 ㅈ · ㅊ", rotate: -150,
@@ -98,12 +99,12 @@ export const ko: Dict = {
         spec: "최대 감쇄 **15 dB** · 검출 대역 HP/LP 지정",
       },
       {
-        path: "click", tag: "Pro-DS엔 없음", tagNew: true, title: "Clicks", sub: "클릭·입소리 — ㅌ 파열음 · 쩝 · 혀 차는 소리", rotate: -205,
+        path: "click", tag: "Pro-DS엔 없음", tagNew: true, title: "Plosives & Clicks", sub: "파열음·입소리 — ㅌ · 쩝 · 혀 차는 소리", rotate: -205,
         body: "짧고 날카로운 ㅌ 계열 파열음과, 입술과 혀에서 나는 클릭을 잡습니다. 마이크 가까이에서 부른 보컬일수록 차이가 큽니다.",
         spec: "최대 감쇄 **6 dB** · 처리 대역 AUTO / MANUAL",
       },
       {
-        path: "breath", tag: "Pro-DS엔 없음", tagNew: true, title: "Breath", sub: "숨소리 — ㅎ · 들숨 · 바람 소리", rotate: -255,
+        path: "breath", tag: "Pro-DS엔 없음", tagNew: true, title: "Breaths", sub: "숨소리·후음 — ㅎ · 들숨 · 바람 소리", rotate: -255,
         body: "주기성이 깨진 바람 소리만 골라서, 숨이 많이 섞인 ㅎ과 들숨을 부드럽게 다듬습니다. 음정이 있는 모음은 대상에서 뺍니다.",
         spec: "최대 감쇄 **12 dB** · 검출 대역 지정",
       },
@@ -118,6 +119,28 @@ export const ko: Dict = {
       click: { label: "클릭", aria: "클릭·입소리 감쇄량" },
       breath: { label: "숨소리", aria: "숨소리 감쇄량" },
     },
+  },
+  guide: {
+    eyebrow: "How it works",
+    title: "치찰음·파열음·숨소리 제거, 이렇게 합니다.",
+    lede: "Just-DS는 소리마다 검출기를 따로 둡니다. 무엇을, 얼마나, 어떻게 줄이는지 정리했습니다.",
+    factsTitle: "Just-DS 한눈에 보기",
+    facts: [
+      { k: "가격", v: "무료 (구독·계정·체험 기간 없음)" },
+      { k: "제거하는 소리", v: "치찰음(ㅅ·ㅆ·ㅊ), ㅌ 파열음·입소리, 숨소리·후음(ㅎ)" },
+      { k: "포맷", v: "VST3 (Windows·macOS), AU (macOS)" },
+      { k: "지원 환경", v: "Windows 64비트, macOS 11 이상 (Apple Silicon·Intel)" },
+      { k: "최대 감쇄", v: "치찰음 15 dB · 파열음·클릭 6 dB · 숨소리 12 dB" },
+      { k: "지연", v: "LOOKAHEAD 켬 150 ms (DAW 자동 보상) · 끔 0 ms" },
+      { k: "개발", v: "Volta (voltamix.studio)" },
+      { k: "버전", v: `${VERSION}` },
+    ],
+    items: [
+      { q: "디에서는 무슨 일을 하나요?", a: "디에서는 보컬의 ㅅ·ㅆ·ㅊ처럼 귀를 찌르는 치찰음이 나오는 순간에만 소리를 줄여서, 나머지 목소리의 밝기는 그대로 둡니다. Just-DS는 보컬용 Single Vocal 검출과 범용 Allround 검출, Split·Wide 처리를 모두 지원합니다." },
+      { q: "파열음과 입소리는 어떻게 줄이나요?", a: "치찰음과 별도인 검출기가 3–11 kHz 대역에서 짧고 날카롭게 튀는 소리, 즉 ㅌ 계열 파열음과 쩝·혀 차는 소리를 찾아 그 순간만 최대 6 dB 줄입니다. 노래하는 음과 치찰음은 다른 처리에 맡깁니다." },
+      { q: "숨소리와 후음(ㅎ)은 어떻게 줄이나요?", a: "음정이 없고 배음이 흐트러진 바람 소리가 300 Hz–2.5 kHz 대역(조절 가능)에 일정 시간 이어지면 숨소리나 ㅎ으로 보고 최대 12 dB 줄입니다. 음정이 있는 모음은 건드리지 않습니다." },
+      { q: "일반 디에서로는 왜 부족한가요?", a: "일반 디에서는 치찰음만 듣습니다. 파열음과 숨소리는 나는 대역도, 모양도 달라서 놓치거나, 잡으려다 보컬 전체를 눌러 버립니다. Just-DS는 소리마다 검출기와 노브를 따로 둡니다." },
+    ],
   },
   blocks: [
     {
@@ -222,10 +245,12 @@ export const ko: Dict = {
     title: "자주 묻는 질문",
     items: [
       { q: "정말 무료인가요?", a: "네. 구독, 계정, 체험 기간, 기능 제한이 없습니다. 내려받아서 쓰면 끝입니다." },
+      { q: "FabFilter Pro-DS 무료 대안이 있나요?", a: "Just-DS가 그 대안입니다. Pro-DS의 핵심 기능(Single Vocal / Allround 검출, Split / Wide 처리, 최대 15 ms Lookahead, 스테레오 링크, Mid/Side, 최대 4배 오버샘플링)을 갖췄고, 파열음·입소리·숨소리 제거를 더했습니다. 무료이며 FabFilter와는 관련이 없습니다." },
       { q: "왜 무료예요?", a: "보컬 정리에 돈을 낼 필요는 없다고 생각했습니다. 그래서 더 많이 하는 걸 만들고, 값은 받지 않기로 했습니다." },
       { q: "FabFilter와 관련이 있나요?", a: "아니요. Just-DS는 Volta가 직접 만든 플러그인이며 FabFilter와 제휴, 후원, 보증 관계가 없습니다. 화면은 Pro-DS를 패러디한 디자인이고, 모든 그래픽과 코드는 직접 만들었습니다." },
-      { q: "어떤 DAW에서 쓸 수 있나요?", a: "VST3 또는 AU를 지원하는 64비트 DAW에서 쓸 수 있습니다. Windows는 VST3, macOS는 VST3와 AU를 제공합니다. Pro Tools용 AAX는 아직 지원하지 않습니다." },
+      { q: "어떤 DAW에서 쓸 수 있나요?", a: "Ableton Live, FL Studio, Cubase, Studio One, Reaper, Logic Pro(AU)처럼 VST3 또는 AU 플러그인을 쓰는 64비트 DAW라면 됩니다. Windows는 VST3, macOS는 VST3와 AU를 제공합니다. Pro Tools용 AAX는 아직 지원하지 않습니다." },
       { q: "지연(레이턴시)이 있나요?", a: "LOOKAHEAD를 켜면 정밀 분석을 위해 150 ms의 지연을 DAW에 알리고, DAW가 자동으로 보상합니다. 녹음하면서 모니터링할 때는 LOOKAHEAD를 끄면 지연 0 ms로 동작합니다." },
+      { q: "ㅍ·ㅂ(P·B) 같은 저음 팝 노이즈도 없애나요?", a: "직접 없애지는 않습니다. ㅍ·ㅂ 팝은 숨이 마이크에 부딪혀 생기는 저음 덩어리입니다. Just-DS의 파열음 처리는 ㅌ처럼 날카로운 고역 파열음과 입소리를 대상으로 합니다. 저음 팝은 하이패스 필터나 전용 팝 제거 플러그인으로 먼저 정리하세요." },
       { q: "영어 보컬에도 쓸 수 있나요?", a: "네. 한국어 보컬로 다듬었지만 s, sh, ch 같은 치찰음과 t 클릭, h 숨소리는 영어에서도 같은 성격의 소리라 그대로 잡습니다." },
       { q: "오디오가 외부로 전송되나요?", a: "아니요. 모든 처리는 컴퓨터 안에서만 이루어집니다. 네트워크 요청, 계정, 업로드가 없습니다." },
     ],
@@ -239,10 +264,10 @@ export const ko: Dict = {
   },
   hint: { lang: "en", text: "Looking for English?", link: "Read it in English →", href: "/en", close: "Close" },
   schema: {
-    pageName: "Just-DS — 무료 디에서 VST3·AU",
-    description: "치찰음, 클릭·입소리(ㅌ), 숨소리(ㅎ)를 따로 찾아 줄이는 무료 디에서 VST3/AU 플러그인.",
+    pageName: "무료 디에서 플러그인 Just-DS — 치찰음·파열음·숨소리 제거",
+    description: "치찰음, ㅌ 파열음·입소리, 숨소리·후음(ㅎ)을 각각 따로 찾아 줄이는 무료 디에서 VST3/AU 플러그인. Windows·macOS.",
     featureList: [
-      "치찰·파찰음 제거 (Single Vocal / Allround 검출)", "클릭·입소리·ㅌ 파열음 제거", "숨소리·ㅎ 제거", "Split / Wide 처리",
+      "무료 디에서: 치찰음 제거 (Single Vocal / Allround 검출)", "ㅌ 파열음·입소리·클릭 제거", "숨소리·후음(ㅎ) 제거", "Split / Wide 처리",
       "Lookahead 0–15 ms, 끄면 지연 0 ms", "검출 대역 HP/LP 필터", "Stereo Link 0–100 %, Mid/Side 처리", "외부 사이드체인",
       "2× / 4× 오버샘플링", "LEARN: 목소리 학습 후 자동 추천", "A/B 비교, Undo/Redo, 프리셋", "한국어 / English UI",
     ],
@@ -253,11 +278,12 @@ export const en: Dict = {
   lang: "en",
   path: "/en",
   meta: {
-    title: "Just-DS by Volta — Free De-esser VST3 / AU | Free Pro-DS Alternative with Click & Breath Removal",
+    title: "Free De-esser Plugin (VST3/AU): Remove Sibilance, Plosives & Breaths | Just-DS by Volta",
     description:
-      "Just-DS is a free de-esser plugin that tames sibilance and also removes mouth clicks, plosive t's and breaths. Single Vocal/Allround, Split/Wide, lookahead, mid/side, 4x oversampling. VST3/AU for Windows and macOS.",
-    ogTitle: "Just-DS — The free de-esser. Sibilance, clicks and breaths.",
-    ogDescription: "Sibilance, plus the mouth clicks and breaths Pro-DS doesn't touch. A free VST3/AU de-esser: no subscription, no account, no trial.",
+      "Just-DS is a free de-esser plugin for Windows and macOS (VST3/AU). It removes harsh sibilance, plosive T clicks, mouth noise and breaths from vocals. A free Pro-DS alternative. No subscription, no account.",
+    keywords: ["free de-esser", "free de-esser plugin", "free de-esser VST", "de-esser VST3", "plosive removal plugin", "remove plosives from vocals", "breath remover plugin", "remove breaths from vocals", "mouth click removal", "free Pro-DS alternative", "free vocal plugin"],
+    ogTitle: "Just-DS — The free de-esser that also removes plosives and breaths",
+    ogDescription: "Remove sibilance, plosive T clicks, mouth noise and breaths from vocals. Free VST3/AU for Windows and macOS. No subscription, no account.",
     ogImage: "/og/og-en.png",
     ogImageAlt: "A gold knob sticking its tongue out next to the Just-DS plugin, free forever",
     ogLocale: "en_US",
@@ -268,10 +294,9 @@ export const en: Dict = {
   langToggle: { aria: "Language" },
   headerCta: "Free download",
   hero: {
-    eyebrow: "Free de-esser plugin · VST3 / AU",
-    h1Extra: " — free de-esser plugin",
+    eyebrow: "Free de-esser · plosive & breath remover",
     tagline: "Free. Really.",
-    claim: ["Everything Pro-DS does.", "Plus clicks & breaths.", "For"],
+    claim: ["Everything Pro-DS does.", "Plus plosives & breaths.", "For"],
     priceAria: "Price comparison",
     priceNote: "Free forever · no subscription, account or trial",
     ctaPrimary: "Free download",
@@ -283,7 +308,7 @@ export const en: Dict = {
     imgAlt: "Just-DS main screen: a waveform display showing sibilance, click and breath reduction, and three gold knobs sticking their tongues out",
     badge: "FREE",
   },
-  ticker: ["Free forever", "Sibilance", "Clicks", "Breaths", "No subscription", "No account", "No trial", "$0.00"],
+  ticker: ["Free forever", "Free de-esser", "Sibilance", "Plosives", "Breaths", "No subscription", "No account", "No trial", "$0.00"],
   intro: {
     title: "Free. No strings attached.",
     body: [
@@ -295,8 +320,8 @@ export const en: Dict = {
   },
   detection: {
     eyebrow: "Accurate detection ×3",
-    title: "Accurate detection. Three times over.",
-    lede: "Single Vocal for a lead line, Allround for drums and full mixes. You know the drill. Just-DS adds one more detector for clicks and another for breaths. Three knobs, three tongues.",
+    title: "Sibilance, plosives, breaths. Caught separately.",
+    lede: "Single Vocal for a lead line, Allround for drums and full mixes, as you'd expect. Then Just-DS adds two detectors a regular de-esser doesn't have: one for plosive T clicks and mouth noise, one for breaths and h sounds. Three knobs, three tongues.",
     cards: [
       {
         path: "sib", tag: "Pro-DS does this too", tagNew: false, title: "Sibilance", sub: "S · SH · CH · harsh Z and J", rotate: -150,
@@ -304,12 +329,12 @@ export const en: Dict = {
         spec: "Up to **15 dB** · HP/LP detection band",
       },
       {
-        path: "click", tag: "Pro-DS can't", tagNew: true, title: "Clicks", sub: "Plosive T · lip smacks · tongue clicks", rotate: -205,
+        path: "click", tag: "Pro-DS can't", tagNew: true, title: "Plosives & Clicks", sub: "Plosive T · lip smacks · mouth clicks", rotate: -205,
         body: "Catches short, sharp t-type plosives and the clicks lips and tongues make. The closer the singer was to the mic, the bigger the difference.",
         spec: "Up to **6 dB** · AUTO / MANUAL treatment band",
       },
       {
-        path: "breath", tag: "Pro-DS can't", tagNew: true, title: "Breath", sub: "H · inhales · air", rotate: -255,
+        path: "breath", tag: "Pro-DS can't", tagNew: true, title: "Breaths", sub: "Breaths · inhales · breathy H", rotate: -255,
         body: "Picks out only the airy, non-pitched noise, and softens breathy h's and inhales. Pitched vowels are left alone.",
         spec: "Up to **12 dB** · adjustable detection band",
       },
@@ -324,6 +349,28 @@ export const en: Dict = {
       click: { label: "Clicks", aria: "Clicks amount" },
       breath: { label: "Breath", aria: "Breath amount" },
     },
+  },
+  guide: {
+    eyebrow: "How it works",
+    title: "Free de-essing, plosive removal and breath removal, explained.",
+    lede: "Just-DS gives each problem sound its own detector. Here is what it removes, by how much, and how.",
+    factsTitle: "Just-DS at a glance",
+    facts: [
+      { k: "Price", v: "Free (no subscription, account or trial)" },
+      { k: "Removes", v: "Sibilance (s, sh, ch), plosive T and mouth clicks, breaths and h sounds" },
+      { k: "Formats", v: "VST3 (Windows, macOS), AU (macOS)" },
+      { k: "Systems", v: "Windows 64-bit; macOS 11 or later (Apple Silicon and Intel)" },
+      { k: "Max reduction", v: "Sibilance 15 dB · plosives/clicks 6 dB · breaths 12 dB" },
+      { k: "Latency", v: "150 ms with lookahead on (compensated by the DAW) · 0 ms with lookahead off" },
+      { k: "Developer", v: "Volta (voltamix.studio)" },
+      { k: "Version", v: `${VERSION}` },
+    ],
+    items: [
+      { q: "What does a de-esser do?", a: "A de-esser turns down harsh sibilance, the hissy s, sh and ch sounds in a vocal, only at the moments it happens, so the rest of the voice keeps its brightness. Just-DS does this with Single Vocal detection for a lead vocal or Allround detection for any other material, in split-band or wide-band mode." },
+      { q: "How does Just-DS remove plosives and mouth clicks?", a: "A separate detector looks for short, sharp transients in the 3–11 kHz range that are not sibilance: t-type plosives, lip smacks and tongue clicks. It reduces only those moments, by up to 6 dB, and leaves sung notes and sibilance to the other paths." },
+      { q: "How does Just-DS remove breaths?", a: "The breath path looks for airy, non-pitched sound: no clear pitch, broken-up harmonics and energy in the 300 Hz–2.5 kHz band (adjustable). When that lasts long enough to be a breath or a breathy h, it is reduced by up to 12 dB. Pitched vowels are not touched." },
+      { q: "Why not just use a regular de-esser?", a: "A regular de-esser only listens for sibilance. Plosive clicks and breaths sit in different frequency ranges and behave differently, so a de-esser either misses them or squashes the whole vocal trying to catch them. Just-DS gives each problem its own detector and its own knob." },
+    ],
   },
   blocks: [
     {
@@ -427,10 +474,12 @@ export const en: Dict = {
     title: "Questions",
     items: [
       { q: "Is it really free?", a: "Yes. No subscription, no account, no trial period and nothing locked. Download it and use it." },
+      { q: "Is there a free alternative to FabFilter Pro-DS?", a: "Yes: Just-DS. It has the core Pro-DS feature set (Single Vocal / Allround detection, split / wide processing, lookahead up to 15 ms, stereo linking, mid/side, up to 4x oversampling) and adds plosive, mouth-click and breath removal. It is free and not affiliated with FabFilter." },
       { q: "Why is it free?", a: "We don't think cleaning up a vocal should cost money. So we built one that does more, and decided not to charge for it." },
       { q: "Is it affiliated with FabFilter?", a: "No. Just-DS is made by Volta and is not affiliated with, sponsored or endorsed by FabFilter. The interface is a parody of Pro-DS, and every graphic and line of code is our own." },
-      { q: "Which DAWs does it work in?", a: "Any 64-bit DAW that hosts VST3 or AU. Windows gets VST3; macOS gets VST3 and AU. AAX for Pro Tools isn't supported yet." },
+      { q: "Which DAWs does it work in?", a: "Any 64-bit DAW that hosts VST3 or AU plug-ins, such as Ableton Live, FL Studio, Cubase, Studio One, Reaper and Logic Pro (AU). Windows gets VST3; macOS gets VST3 and AU. AAX for Pro Tools isn't supported yet." },
       { q: "Does it add latency?", a: "With LOOKAHEAD on, it reports 150 ms to the DAW for precise analysis, and the DAW compensates automatically. Turn LOOKAHEAD off while tracking and it runs at zero latency." },
+      { q: "Does it remove P and B pops?", a: "Not directly. P and B pops are low-frequency bursts of air hitting the microphone. Just-DS's plosive path targets sharp, high-frequency t-type plosives and mouth clicks. For low-frequency pops, use a high-pass filter or a dedicated pop remover before Just-DS." },
       { q: "Does it work on English vocals?", a: "Yes. It was tuned on Korean vocals, but s, sh and ch sibilance, t clicks and h breaths are the same kinds of sound in English, and it catches them the same way." },
       { q: "Does my audio leave my computer?", a: "No. Everything runs locally. No network requests, no account, no uploads." },
     ],
@@ -444,10 +493,10 @@ export const en: Dict = {
   },
   hint: { lang: "ko", text: "한국어로 보시겠어요?", link: "한국어 페이지 →", href: "/ko", close: "닫기" },
   schema: {
-    pageName: "Just-DS — Free De-esser VST3 / AU",
-    description: "A free de-esser VST3/AU plugin that finds and reduces sibilance, mouth clicks and breaths separately.",
+    pageName: "Free De-esser Plugin Just-DS — Sibilance, Plosive & Breath Removal",
+    description: "Free de-esser VST3/AU plugin for Windows and macOS that removes sibilance, plosive T clicks, mouth noise and breaths from vocals, each with its own detector.",
     featureList: [
-      "Sibilance removal with Single Vocal / Allround detection", "Mouth click and plosive t removal", "Breath and h removal",
+      "Free de-esser: sibilance removal with Single Vocal / Allround detection", "Plosive T and mouth click removal", "Breath and h-sound removal",
       "Split / Wide band processing", "Lookahead 0–15 ms, zero latency when off", "HP/LP detection band filters",
       "Stereo link 0–100 %, mid/side processing", "External side-chain", "2x / 4x oversampling",
       "LEARN: listens to the voice and suggests settings", "A/B compare, undo/redo, presets", "English / Korean UI",

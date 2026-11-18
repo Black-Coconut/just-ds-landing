@@ -77,10 +77,12 @@ export default function Landing({ t }: { t: Dict }) {
         <section className="hero">
           <div className="wrap">
             <div className="hero-copy">
-              <p className="eyebrow">{t.hero.eyebrow}</p>
-              <h1 className="hero-title">
-                Just<span className="dot" aria-hidden="true"> • </span><span className="sr-only">-</span>DS
-                <span className="sr-only">{t.hero.h1Extra}</span>
+              {/* the visible H1 carries the main query ("free de-esser · plosive & breath remover") and the name */}
+              <h1 className="hero-h1">
+                <span className="eyebrow">{t.hero.eyebrow}</span>
+                <span className="sr-only"> — </span>
+                {/* text reads "Just-DS"; CSS draws the hyphen as a gold " • " */}
+                <span className="hero-title">Just<span className="dash">-</span>DS</span>
               </h1>
               <p className="hero-by">by <a href="https://voltamix.studio">VOLTA</a></p>
               <p className="hero-tagline">{t.hero.tagline}</p>
@@ -154,6 +156,34 @@ export default function Landing({ t }: { t: Dict }) {
               ))}
             </div>
             <Demo t={t.demo} />
+          </div>
+        </section>
+
+        {/* ---------- how it works: answer-first facts and Q&A (search snippets and AI answers quote this) ---------- */}
+        <section className="section" id="how-it-works" aria-labelledby="guide-title">
+          <div className="wrap">
+            <SectionHead id="guide-title" eyebrow={t.guide.eyebrow} title={t.guide.title} lede={t.guide.lede} />
+            <div className="guide-grid">
+              <div className="facts panel">
+                <h3>{t.guide.factsTitle}</h3>
+                <dl>
+                  {t.guide.facts.map((f) => (
+                    <div key={f.k}>
+                      <dt>{f.k}</dt>
+                      <dd>{f.v}</dd>
+                    </div>
+                  ))}
+                </dl>
+              </div>
+              <div className="guide-qa">
+                {t.guide.items.map((it) => (
+                  <article key={it.q}>
+                    <h3>{it.q}</h3>
+                    <p>{keepNames(it.a)}</p>
+                  </article>
+                ))}
+              </div>
+            </div>
           </div>
         </section>
 
