@@ -6,7 +6,7 @@ export const VERSION = "1.1.0";
    Empty string = the button renders as a disabled "coming soon".
    ============================================================ */
 export const DOWNLOADS = {
-  windows: "", // e.g. "https://github.com/<org>/<repo>/releases/download/v0.7.4/Just-DS-0.7.4-Windows-x64.zip"
+  windows: "/downloads/Just-DS-1.1.0-Windows-Setup.exe", // public/downloads/ (Inno Setup installer, VST3)
   mac: "/downloads/Just-DS-1.1.0-macOS.pkg", // public/downloads/ (notarized pkg from the plug-in repo's dist/)
 } as const;
 
