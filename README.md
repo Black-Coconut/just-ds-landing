@@ -9,6 +9,12 @@ Next.js 16 (App Router) + TypeScript, 두 페이지 모두 빌드 때 정적 HTM
 | `/en` | English |
 | `/sitemap.xml`, `/robots.txt`, `/manifest.webmanifest` | 코드로 생성 (`app/sitemap.ts` 등) |
 
+페이지 흐름은 [FabFilter Pro-DS 제품 페이지](https://www.fabfilter.com/products/pro-ds-de-esser-plug-in)를
+그대로 따라가며 각 블록을 비튼다: 히어로("Pro • DS" → "Just • DS", -25% → -100%, 30일 체험판 → 평생 체험판) →
+소개 + 인용("당신의 지갑") → Accurate detection ×3 + 직접 해 보세요 → Everything you need → goodies →
+비교표 → Awards(없음) → Key features 번호 목록 → 다운로드 + Information → 포함된 번들(없음) → FAQ.
+FabFilter 로고·이미지·문장은 가져오지 않고, 제품명은 비교와 패러디 표기에만 쓴다.
+
 ## 자주 고칠 곳
 
 | 하고 싶은 일 | 파일 |

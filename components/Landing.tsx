@@ -4,7 +4,6 @@ import { DOWNLOADS, PRO_DS_PRICE } from "@/lib/site";
 import { KnobArt, KnobSprite } from "./Knob";
 import HeroKnob from "./HeroKnob";
 import Demo from "./Demo";
-import Gallery from "./Gallery";
 import LangHint from "./LangHint";
 import JsonLd from "./JsonLd";
 
@@ -23,6 +22,16 @@ const MacIcon = () => (
     <path fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" d="M4 5.5h16v10H4zM2 18.5h20" />
   </svg>
 );
+
+function SectionHead({ id, eyebrow, title, lede }: { id: string; eyebrow: string; title: string; lede?: string }) {
+  return (
+    <div className="section-head">
+      <p className="eyebrow">{eyebrow}</p>
+      <h2 id={id}>{title}</h2>
+      {lede && <p className="lede">{lede}</p>}
+    </div>
+  );
+}
 
 export default function Landing({ t }: { t: Dict }) {
   const year = new Date().getFullYear();
@@ -44,10 +53,11 @@ export default function Landing({ t }: { t: Dict }) {
             </span>
           </a>
           <nav className="nav" aria-label={t.nav.aria}>
-            <a href="#tongues">{t.nav.features}</a>
+            <a href="#features">{t.nav.features}</a>
             <a href="#compare">{t.nav.compare}</a>
-            <a href="#gallery">{t.nav.screens}</a>
+            <a href="#download">{t.nav.download}</a>
             <a href="#faq">{t.nav.faq}</a>
+            <a className="nav-shop" href="#download" aria-label={t.nav.shopAria}><s>{t.nav.shop}</s></a>
           </nav>
           <div className="header-actions">
             <a className="lang-switch" href={t.langSwitch.href} hrefLang={t.langSwitch.hreflang} lang={t.langSwitch.hreflang}>
@@ -59,17 +69,21 @@ export default function Landing({ t }: { t: Dict }) {
       </header>
 
       <main id="main">
-        {/* ---------- hero ---------- */}
+        {/* ---------- hero: "Pro • DS / Intelligent and transparent", but free ---------- */}
         <section className="hero">
           <div className="wrap">
             <div className="hero-copy">
               <p className="eyebrow">{t.hero.eyebrow}</p>
-              <h1>
-                <span className="line">{t.hero.lines[0]}</span>
-                <span className="line dim">{t.hero.lines[1]}</span>
-                <span className="line">{t.hero.lines[2]} <span className="zero">$0</span></span>
+              <h1 className="hero-title">
+                Just<span className="dot" aria-hidden="true"> • </span><span className="sr-only">-</span>DS
+                <span className="sr-only">{t.hero.h1Extra}</span>
               </h1>
-              <p className="lede">{rich(t.hero.lede)}</p>
+              <p className="hero-tagline">{t.hero.tagline}</p>
+              <p className="hero-claim">
+                <span className="line">{t.hero.claim[0]}</span>
+                <span className="line dim">{t.hero.claim[1]}</span>
+                <span className="line">{t.hero.claim[2]} <span className="zero">$0</span></span>
+              </p>
               <div className="price-row" aria-label={t.hero.priceAria}>
                 <span className="price-old">{PRO_DS_PRICE}</span>
                 <span className="price-arrow" aria-hidden="true">→</span>
@@ -78,7 +92,9 @@ export default function Landing({ t }: { t: Dict }) {
               </div>
               <div className="hero-ctas">
                 <a className="btn btn-gold" href="#download">{t.hero.ctaPrimary}</a>
-                <a className="btn" href="#compare">{t.hero.ctaSecondary}</a>
+                <a className="btn btn-trial" href="#download">
+                  <s>{t.hero.ctaTrialOld}</s> {t.hero.ctaTrialNew}
+                </a>
               </div>
               <ul className="hero-meta" aria-label={t.hero.metaAria}>
                 {t.hero.meta.map((m) => <li key={m}>{m}</li>)}
@@ -89,6 +105,7 @@ export default function Landing({ t }: { t: Dict }) {
                 {/* eslint-disable-next-line @next/next/no-img-element -- pre-optimised 900px webp, LCP */}
                 <img src={t.hero.img} width={900} height={598} fetchPriority="high" alt={t.hero.imgAlt} />
               </div>
+              <span className="sale-badge" aria-hidden="true">{t.hero.badge}</span>
               <HeroKnob />
             </div>
           </div>
@@ -100,16 +117,29 @@ export default function Landing({ t }: { t: Dict }) {
           </div>
         </div>
 
-        {/* ---------- three tongues ---------- */}
-        <section className="section" id="tongues" aria-labelledby="tongues-title">
-          <div className="wrap">
-            <div className="section-head">
-              <p className="eyebrow">{t.tongues.eyebrow}</p>
-              <h2 id="tongues-title">{t.tongues.title}</h2>
-              <p className="lede">{t.tongues.lede}</p>
+        {/* ---------- intro + pull quote ---------- */}
+        <section className="section" id="intro" aria-labelledby="intro-title">
+          <div className="wrap intro-grid">
+            <div>
+              <h2 id="intro-title">{t.intro.title}</h2>
+              {t.intro.body.map((p, i) => <p className="lede" key={i}>{rich(p)}</p>)}
             </div>
+            <figure className="quote-card panel">
+              <blockquote>“{t.intro.quote}”</blockquote>
+              <figcaption>
+                <KnobArt rotate={-100} className="quote-avatar" />
+                <span>— {t.intro.quoteBy}</span>
+              </figcaption>
+            </figure>
+          </div>
+        </section>
+
+        {/* ---------- accurate detection ×3 + try it yourself ---------- */}
+        <section className="section section-alt" id="features" aria-labelledby="detection-title">
+          <div className="wrap">
+            <SectionHead id="detection-title" eyebrow={t.detection.eyebrow} title={t.detection.title} lede={t.detection.lede} />
             <div className="tongues-grid">
-              {t.tongues.cards.map((c) => (
+              {t.detection.cards.map((c) => (
                 <article key={c.path} className="tongue-card panel" data-path={c.path}>
                   <span className={c.tagNew ? "tag new" : "tag"}>{c.tag}</span>
                   <KnobArt className="knob-icon" rotate={c.rotate} />
@@ -124,14 +154,33 @@ export default function Landing({ t }: { t: Dict }) {
           </div>
         </section>
 
+        {/* ---------- "Everything you need" / "goodies" blocks ---------- */}
+        {t.blocks.map((b, i) => (
+          <section key={b.id} className="section feature-section" id={b.id} aria-labelledby={`${b.id}-title`}>
+            <div className={i % 2 ? "wrap feature-row reverse" : "wrap feature-row"}>
+              <div className="row-copy">
+                <p className="eyebrow">{b.eyebrow}</p>
+                <h2 id={`${b.id}-title`}>{b.title}</h2>
+                <p className="lede">{b.body}</p>
+                <ul className="row-bullets">
+                  {b.bullets.map((x) => <li key={x}>{x}</li>)}
+                </ul>
+              </div>
+              <figure className="row-media">
+                <div className="shot">
+                  {/* eslint-disable-next-line @next/next/no-img-element -- pre-optimised 900px webp */}
+                  <img src={b.img} width={900} height={598} loading="lazy" alt={b.alt} />
+                </div>
+                <figcaption>{b.caption}</figcaption>
+              </figure>
+            </div>
+          </section>
+        ))}
+
         {/* ---------- comparison ---------- */}
         <section className="section section-alt" id="compare" aria-labelledby="compare-title">
           <div className="wrap">
-            <div className="section-head">
-              <p className="eyebrow">{t.compare.eyebrow}</p>
-              <h2 id="compare-title">{t.compare.title}</h2>
-              <p className="lede">{t.compare.lede}</p>
-            </div>
+            <SectionHead id="compare-title" eyebrow={t.compare.eyebrow} title={t.compare.title} lede={t.compare.lede} />
             <div className="compare-wrap panel">
               <table className="compare">
                 <caption className="sr-only">{t.compare.caption}</caption>
@@ -162,44 +211,39 @@ export default function Landing({ t }: { t: Dict }) {
           </div>
         </section>
 
-        {/* ---------- everything else ---------- */}
-        <section className="section" id="features" aria-labelledby="features-title">
+        {/* ---------- awards (none, honestly) ---------- */}
+        <section className="section awards-section" aria-labelledby="awards-title">
           <div className="wrap">
             <div className="section-head">
-              <p className="eyebrow">{t.features.eyebrow}</p>
-              <h2 id="features-title">{t.features.title}</h2>
+              <h2 id="awards-title">{t.awards.title}</h2>
+              <p className="lede">{t.awards.note}</p>
             </div>
-            <div className="features">
-              {t.features.items.map((f) => (
-                <div className="feature" key={f.title}>
-                  <h3>{f.title}</h3>
-                  <p>{f.body}</p>
-                </div>
+            <ul className="awards">
+              {t.awards.badges.map((b) => (
+                <li className="award" key={b.top}>
+                  <span className="award-top">{b.top}</span>
+                  <span className="award-main">{b.main}</span>
+                  <span className="award-bottom">{b.bottom}</span>
+                </li>
               ))}
-            </div>
+            </ul>
           </div>
         </section>
 
-        {/* ---------- screens ---------- */}
-        <section className="section pt-0" id="gallery" aria-labelledby="gallery-title">
+        {/* ---------- key features (numbered, like the original) ---------- */}
+        <section className="section section-alt" id="key-features" aria-labelledby="kf-title">
           <div className="wrap">
-            <div className="section-head">
-              <p className="eyebrow">{t.gallery.eyebrow}</p>
-              <h2 id="gallery-title">{t.gallery.title}</h2>
-              <p className="lede">{t.gallery.lede}</p>
-            </div>
-            <Gallery t={t.gallery} />
+            <SectionHead id="kf-title" eyebrow={t.keyFeatures.eyebrow} title={t.keyFeatures.title} />
+            <ol className="kf-list">
+              {t.keyFeatures.items.map((x) => <li key={x}>{x}</li>)}
+            </ol>
           </div>
         </section>
 
-        {/* ---------- download ---------- */}
+        {/* ---------- download + information ---------- */}
         <section className="section download" id="download" aria-labelledby="download-title">
           <div className="wrap">
-            <div className="section-head">
-              <p className="eyebrow">{t.download.eyebrow}</p>
-              <h2 id="download-title">{t.download.title}</h2>
-              <p className="lede">{t.download.lede}</p>
-            </div>
+            <SectionHead id="download-title" eyebrow={t.download.eyebrow} title={t.download.title} lede={t.download.lede} />
             <div className="dl-grid">
               {t.download.cards.map((c) => {
                 const url = DOWNLOADS[c.platform];
@@ -226,16 +270,41 @@ export default function Landing({ t }: { t: Dict }) {
               })}
             </div>
             <p className="version-line">{rich(t.download.versionLine)}</p>
+
+            <h2 className="info-title" id="info-title">{t.info.title}</h2>
+            <div className="features info-grid" aria-labelledby="info-title">
+              {t.info.blocks.map((b) => (
+                <div className="feature" key={b.title}>
+                  <h3>{b.title}</h3>
+                  {b.lines.map((l) => <p key={l}>{l}</p>)}
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ---------- "included in" bundles ---------- */}
+        <section className="section bundles-section" aria-labelledby="bundles-title">
+          <div className="wrap">
+            <div className="section-head">
+              <h2 id="bundles-title">{t.bundles.title}</h2>
+              <p className="lede">{t.bundles.body}</p>
+            </div>
+            <ul className="bundles">
+              {t.bundles.tiles.map((b, i) => (
+                <li key={b.name} className={i === t.bundles.tiles.length - 1 ? "bundle panel ours" : "bundle panel"}>
+                  <span className="bundle-name">{b.name}</span>
+                  <span className="bundle-price">{b.price}</span>
+                </li>
+              ))}
+            </ul>
           </div>
         </section>
 
         {/* ---------- faq ---------- */}
-        <section className="section" id="faq" aria-labelledby="faq-title">
+        <section className="section section-alt" id="faq" aria-labelledby="faq-title">
           <div className="wrap">
-            <div className="section-head">
-              <p className="eyebrow">{t.faq.eyebrow}</p>
-              <h2 id="faq-title">{t.faq.title}</h2>
-            </div>
+            <SectionHead id="faq-title" eyebrow={t.faq.eyebrow} title={t.faq.title} />
             <div className="faq">
               {t.faq.items.map((f) => (
                 <details key={f.q}>
