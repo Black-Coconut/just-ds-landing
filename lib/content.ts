@@ -29,6 +29,11 @@ export type Dict = {
   detection: { eyebrow: string; title: string; lede: string; cards: Card[] };
   guide: { eyebrow: string; title: string; lede: string; factsTitle: string; facts: { k: string; v: string }[]; items: Qa[] };
   demo: { title: string; note: string; canvasLabel: string; knobs: Record<PathKey, { label: string; aria: string }> };
+  listen: {
+    title: string; note: string; canvasLabel: string; loading: string; play: string; pause: string; ab: string; abAria: string;
+    tracks: Record<"original" | PathKey | "all", string>; momentsTitle: string; loopOff: string;
+    hints: Record<PathKey, string>;
+  };
   blocks: Block[];
   compare: { eyebrow: string; title: string; lede: string; caption: string; cols: [string, string, string]; extraBadge: string; rows: Row[]; footnote: string };
   keyFeatures: { eyebrow: string; title: string; items: string[] };
@@ -118,6 +123,24 @@ export const ko: Dict = {
       sib: { label: "치찰음", aria: "치찰음 감쇄량" },
       click: { label: "클릭", aria: "클릭·입소리 감쇄량" },
       breath: { label: "숨소리", aria: "숨소리 감쇄량" },
+    },
+  },
+  listen: {
+    title: "들어 보세요",
+    note: "실제 보컬을 Just-DS로 처리한 결과입니다.",
+    canvasLabel: "보컬 파형. 색칠된 부분과 위쪽 곡선이 선택한 처리가 줄인 양입니다. 클릭하면 그 위치로 이동합니다.",
+    loading: "불러오는 중…",
+    play: "재생",
+    pause: "일시정지",
+    ab: "원본과 번갈아 듣기",
+    abAria: "원본과 처리 결과를 번갈아 듣기",
+    tracks: { original: "원본", sib: "치찰음", click: "파열음", breath: "후음", all: "세 가지 모두" },
+    momentsTitle: "여기를 들어 보세요",
+    loopOff: "전체 듣기",
+    hints: {
+      sib: "s·sh 소리가 덜 따갑습니다",
+      click: "입술·혀에서 나는 짧은 클릭이 줄어듭니다",
+      breath: "단어 사이 들숨이 작아집니다",
     },
   },
   guide: {
@@ -348,6 +371,24 @@ export const en: Dict = {
       sib: { label: "Sibilance", aria: "Sibilance amount" },
       click: { label: "Clicks", aria: "Clicks amount" },
       breath: { label: "Breath", aria: "Breath amount" },
+    },
+  },
+  listen: {
+    title: "Hear it",
+    note: "A real vocal processed with Just-DS.",
+    canvasLabel: "Vocal waveform. Coloured areas and the curve on top show what the selected processing removed. Click to jump there.",
+    loading: "Loading…",
+    play: "Play",
+    pause: "Pause",
+    ab: "Flip with original",
+    abAria: "Switch between the original and the processed vocal",
+    tracks: { original: "Original", sib: "Sibilance", click: "Clicks", breath: "Breaths", all: "All three" },
+    momentsTitle: "Listen here",
+    loopOff: "Back to the full take",
+    hints: {
+      sib: "S and SH sounds get less harsh",
+      click: "Short lip and tongue clicks get quieter",
+      breath: "Breaths between words get quieter",
     },
   },
   guide: {

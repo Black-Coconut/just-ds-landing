@@ -4,6 +4,7 @@ import { DOWNLOADS } from "@/lib/site";
 import { KnobArt, KnobSprite } from "./Knob";
 import HeroKnob from "./HeroKnob";
 import Demo from "./Demo";
+import Listen from "./Listen";
 import LangHint from "./LangHint";
 import LangSwitch, { LangLink } from "./LangSwitch";
 import JsonLd from "./JsonLd";
@@ -156,6 +157,7 @@ export default function Landing({ t }: { t: Dict }) {
               ))}
             </div>
             <Demo t={t.demo} />
+            <Listen t={t.listen} />
           </div>
         </section>
 
