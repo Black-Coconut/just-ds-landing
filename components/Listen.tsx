@@ -1,15 +1,18 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, type KeyboardEvent, type MouseEvent } from "react";
+import { useCallback, useEffect, useRef, useState, type KeyboardEvent, type MouseEvent, type PointerEvent } from "react";
 import type { Dict, PathKey } from "@/lib/content";
 
 /* Real before/after audio. The same vocal was rendered through the Just-DS VST3 with the settings
    saved in the test Ableton set; all five clips are sample-aligned, so switching keeps the position. */
 
 type TrackKey = "original" | PathKey | "all";
+type Span = { start: number; end: number };
 const TRACKS: TrackKey[] = ["original", "sib", "click", "breath", "all"];
 const COLORS: Record<TrackKey, string> = { original: "#8d9097", sib: "#a6dc2a", click: "#ff5d8f", breath: "#ffa91f", all: "#ffc21a" };
 const SRC = (k: TrackKey) => `/assets/audio/compare-${k}.m4a`;
+const MIN_LOOP = 0.25; // s
+const EDGE_PX = 8; // grab distance for the loop handles
 
 // where each path works hardest in this take (found by comparing the renders band by band)
 const MOMENTS: { path: PathKey; start: number; end: number }[] = [
@@ -23,15 +26,20 @@ const MOMENTS: { path: PathKey; start: number; end: number }[] = [
 
 type Peaks = { duration: number; hop: number; peaks: Record<TrackKey, number[]>; gr: Record<Exclude<TrackKey, "original">, number[]> };
 type Engine = { ctx: AudioContext; buffers: Record<TrackKey, AudioBuffer>; gains: Record<TrackKey, GainNode>; sources: AudioBufferSourceNode[] };
+type Drag = { mode: "new" | "move" | "start" | "end"; x0: number; t0: number; orig: Span | null; moved: boolean };
 
 const fmt = (s: number) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
+const fmtFine = (s: number) => `${Math.floor(s / 60)}:${(s % 60).toFixed(1).padStart(4, "0")}`;
 
 export default function Listen({ t }: { t: Dict["listen"] }) {
   const canvas = useRef<HTMLCanvasElement>(null);
   const engine = useRef<Engine | null>(null);
   const loading = useRef<Promise<Engine> | null>(null);
-  const clock = useRef({ startedAt: 0, offset: 0 }); // offset = position (s) at ctx time startedAt
+  // offset = position (s) at ctx time startedAt; loop = the loop the running sources were started with
+  const clock = useRef<{ startedAt: number; offset: number; loop: Span | null }>({ startedAt: 0, offset: 0, loop: null });
   const raf = useRef(0);
+  const drag = useRef<Drag | null>(null);
+  const live = useRef<Span | null>(null); // region while dragging
 
   const [peaks, setPeaks] = useState<Peaks | null>(null);
   const [track, setTrack] = useState<TrackKey>("sib");
@@ -39,13 +47,20 @@ export default function Listen({ t }: { t: Dict["listen"] }) {
   const [playing, setPlaying] = useState(false);
   const [busy, setBusy] = useState(false);
   const [pos, setPos] = useState(0);
-  const [loop, setLoop] = useState<{ start: number; end: number } | null>(null);
+  // cycle region (drawn on the ruler or set by a moment), whether it is on, and the visible window
+  const [region, setRegion] = useState<Span | null>(null);
+  const [cycle, setCycle] = useState(false);
+  const [zoom, setZoom] = useState<Span | null>(null);
+
+  const loop = cycle && region ? region : null; // what the audio actually loops
   const loopRef = useRef(loop);
   loopRef.current = loop;
   const trackRef = useRef(track);
   trackRef.current = track;
 
   const duration = peaks?.duration ?? 45.7;
+  const v0 = zoom?.start ?? 0;
+  const v1 = zoom?.end ?? duration;
 
   useEffect(() => {
     fetch("/assets/audio/compare-peaks.json").then((r) => r.json()).then(setPeaks).catch(() => {});
@@ -81,7 +96,7 @@ export default function Listen({ t }: { t: Dict["listen"] }) {
     const e = engine.current;
     if (!e || !playing) return clock.current.offset;
     let p = clock.current.offset + (e.ctx.currentTime - clock.current.startedAt);
-    const l = loopRef.current;
+    const l = clock.current.loop;
     if (l && p >= l.start) p = l.start + ((p - l.start) % (l.end - l.start));
     return p;
   }, [playing]);
@@ -97,8 +112,10 @@ export default function Listen({ t }: { t: Dict["listen"] }) {
     e.sources = [];
   };
 
-  const startAt = useCallback((e: Engine, at: number, l: { start: number; end: number } | null) => {
+  /** Start all five sources together. With a loop, a start past its end jumps to its start (like a DAW cycle). */
+  const startAt = useCallback((e: Engine, from: number, l: Span | null) => {
     stopSources();
+    const at = l && from > l.end ? l.start : from;
     const when = e.ctx.currentTime + 0.03;
     e.sources = TRACKS.map((k) => {
       const s = e.ctx.createBufferSource();
@@ -109,7 +126,8 @@ export default function Listen({ t }: { t: Dict["listen"] }) {
       return s;
     });
     e.sources[0].onended = () => { setPlaying(false); clock.current.offset = 0; setPos(0); };
-    clock.current = { startedAt: when, offset: at };
+    clock.current = { startedAt: when, offset: at, loop: l };
+    return at;
   }, []);
 
   const play = useCallback(async (from?: number, l = loopRef.current) => {
@@ -117,9 +135,10 @@ export default function Listen({ t }: { t: Dict["listen"] }) {
     try {
       const e = await ensureEngine();
       if (e.ctx.state === "suspended") await e.ctx.resume();
-      let at = from ?? clock.current.offset;
+      // with a loop on, Play always starts from the loop start (like a DAW cycle); otherwise resume
+      let at = from ?? (l ? l.start : clock.current.offset);
       if (at >= duration - 0.05) at = 0;
-      startAt(e, at, l);
+      setPos(startAt(e, at, l));
       setPlaying(true);
     } finally {
       setBusy(false);
@@ -128,15 +147,19 @@ export default function Listen({ t }: { t: Dict["listen"] }) {
 
   const pause = useCallback(() => {
     clock.current.offset = position();
+    setPos(clock.current.offset);
     stopSources();
     setPlaying(false);
   }, [position]);
 
-  const seek = useCallback((to: number, l = loopRef.current) => {
-    const at = Math.max(0, Math.min(duration - 0.05, to));
+  /** Re-cue playback (if running) after the position or the loop changed. */
+  const cue = useCallback((to: number, l: Span | null) => {
+    let at = Math.max(0, Math.min(duration - 0.05, to));
+    if (playing && engine.current) at = startAt(engine.current, at, l);
+    else if (l && at > l.end) at = l.start;
     clock.current.offset = at;
+    clock.current.loop = l;
     setPos(at);
-    if (playing && engine.current) startAt(engine.current, at, l);
   }, [duration, playing, startAt]);
 
   const choose = useCallback((k: TrackKey) => {
@@ -155,16 +178,25 @@ export default function Listen({ t }: { t: Dict["listen"] }) {
 
   const playMoment = (m: (typeof MOMENTS)[number]) => {
     const l = { start: m.start, end: m.end };
-    setLoop(l);
+    setRegion(l);
+    setCycle(true);
+    setZoom({ start: Math.max(0, m.start - 0.4), end: Math.min(duration, m.end + 0.4) });
     choose(m.path);
     if (playing && engine.current) { startAt(engine.current, m.start, l); setPos(m.start); }
     else { clock.current.offset = m.start; setPos(m.start); void play(m.start, l); }
   };
 
-  const clearLoop = () => {
-    const at = position();
-    setLoop(null);
-    if (playing && engine.current) startAt(engine.current, at, null);
+  const toggleCycle = () => {
+    if (!region) return;
+    const on = !cycle;
+    setCycle(on);
+    cue(position(), on ? region : null);
+  };
+
+  const clearRegion = () => {
+    setRegion(null);
+    setCycle(false);
+    cue(position(), null);
   };
 
   // playhead
@@ -190,19 +222,26 @@ export default function Listen({ t }: { t: Dict["listen"] }) {
     }
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.clearRect(0, 0, w, h);
-    // whole take, or zoomed in on the moment being looped so the difference is visible
-    const v0 = loop ? Math.max(0, loop.start - 0.4) : 0;
-    const v1 = loop ? Math.min(duration, loop.end + 0.4) : duration;
     const X = (s: number) => ((s - v0) / (v1 - v0)) * w;
     const lane = 34, mid = lane + (h - lane) / 2, half = (h - lane) / 2 - 8;
 
-    for (const m of MOMENTS) {
-      const on = track === m.path || track === "original" || track === "all";
-      if (!on || m.end < v0 || m.start > v1 || (loop && loop.start !== m.start)) continue;
-      ctx.fillStyle = COLORS[m.path];
-      ctx.globalAlpha = loop ? 0.06 : 0.09;
-      ctx.fillRect(X(m.start), 0, X(m.end) - X(m.start), h);
-      ctx.globalAlpha = 1;
+    // listening moments for the selected path (all of them on Original / All three)
+    if (!zoom) {
+      for (const m of MOMENTS) {
+        if (!(track === m.path || track === "original" || track === "all")) continue;
+        ctx.fillStyle = COLORS[m.path];
+        ctx.globalAlpha = 0.09;
+        ctx.fillRect(X(m.start), 0, X(m.end) - X(m.start), h);
+        ctx.globalAlpha = 1;
+      }
+    }
+    // cycle region
+    if (region) {
+      ctx.fillStyle = cycle ? "rgba(255,194,26,0.10)" : "rgba(255,255,255,0.05)";
+      ctx.fillRect(X(region.start), 0, X(region.end) - X(region.start), h);
+      ctx.fillStyle = cycle ? "rgba(255,194,26,0.55)" : "rgba(255,255,255,0.2)";
+      ctx.fillRect(Math.round(X(region.start)), 0, 1, h);
+      ctx.fillRect(Math.round(X(region.end)) - 1, 0, 1, h);
     }
 
     ctx.strokeStyle = "rgba(255,255,255,0.05)";
@@ -211,7 +250,7 @@ export default function Listen({ t }: { t: Dict["listen"] }) {
 
     if (peaks) {
       const orig = peaks.peaks.original, proc = peaks.peaks[track], hop = peaks.hop;
-      const step = loop ? 3 : 2; // px per bar
+      const step = v1 - v0 < 8 ? 3 : 2; // px per bar
       const bars = Math.floor(w / step);
       const span = (v1 - v0) / bars;
       const gr = track === "original" ? null : peaks.gr?.[track] ?? null;
@@ -244,7 +283,7 @@ export default function Listen({ t }: { t: Dict["listen"] }) {
       ctx.fillStyle = "#ecedef";
       ctx.fillRect(Math.round(X(pos)) - 1, 0, 2, h);
     }
-  }, [peaks, track, pos, duration, loop]);
+  }, [peaks, track, pos, v0, v1, zoom, region, cycle]);
 
   useEffect(() => {
     draw();
@@ -255,21 +294,88 @@ export default function Listen({ t }: { t: Dict["listen"] }) {
     return () => ro.disconnect();
   }, [draw]);
 
-  const onCanvasClick = (e: MouseEvent<HTMLCanvasElement>) => {
-    const r = e.currentTarget.getBoundingClientRect();
-    const l = loopRef.current;
-    const v0 = l ? Math.max(0, l.start - 0.4) : 0, v1 = l ? Math.min(duration, l.end + 0.4) : duration;
-    const to = v0 + ((e.clientX - r.left) / r.width) * (v1 - v0);
-    if (l && (to < l.start || to > l.end)) { setLoop(null); seek(to, null); }
-    else seek(to);
+  const timeAt = (clientX: number, el: Element) => {
+    const r = el.getBoundingClientRect();
+    return Math.max(0, Math.min(duration, v0 + ((clientX - r.left) / r.width) * (v1 - v0)));
   };
 
+  const onCanvasClick = (e: MouseEvent<HTMLCanvasElement>) => cue(timeAt(e.clientX, e.currentTarget), loop);
+
   const onKey = (e: KeyboardEvent<HTMLCanvasElement>) => {
-    if (e.key === "ArrowRight") { e.preventDefault(); seek(position() + 2); }
-    if (e.key === "ArrowLeft") { e.preventDefault(); seek(position() - 2); }
+    if (e.key === "ArrowRight") { e.preventDefault(); cue(position() + 2, loop); }
+    if (e.key === "ArrowLeft") { e.preventDefault(); cue(position() - 2, loop); }
+  };
+
+  /* ---------- cycle ruler: drag to draw a loop, drag its body to move it, its edges to resize; click toggles ---------- */
+  const onRulerDown = (e: PointerEvent<HTMLDivElement>) => {
+    if (e.button !== 0) return;
+    const el = e.currentTarget, r = el.getBoundingClientRect();
+    const tt = timeAt(e.clientX, el);
+    const px = (s: number) => r.left + ((s - v0) / (v1 - v0)) * r.width;
+    let mode: Drag["mode"] = "new";
+    if (region) {
+      if (Math.abs(e.clientX - px(region.start)) <= EDGE_PX) mode = "start";
+      else if (Math.abs(e.clientX - px(region.end)) <= EDGE_PX) mode = "end";
+      else if (tt > region.start && tt < region.end) mode = "move";
+    }
+    el.setPointerCapture(e.pointerId);
+    drag.current = { mode, x0: e.clientX, t0: tt, orig: region, moved: false };
+  };
+
+  const onRulerMove = (e: PointerEvent<HTMLDivElement>) => {
+    const d = drag.current;
+    const el = e.currentTarget;
+    if (!d) {
+      // cursor hint
+      const r = el.getBoundingClientRect(), px = (s: number) => r.left + ((s - v0) / (v1 - v0)) * r.width;
+      el.style.cursor = region && (Math.abs(e.clientX - px(region.start)) <= EDGE_PX || Math.abs(e.clientX - px(region.end)) <= EDGE_PX)
+        ? "ew-resize" : region && timeAt(e.clientX, el) > region.start && timeAt(e.clientX, el) < region.end ? "grab" : "crosshair";
+      return;
+    }
+    if (!d.moved && Math.abs(e.clientX - d.x0) < 4) return;
+    d.moved = true;
+    const tt = timeAt(e.clientX, el);
+    let next: Span;
+    if (d.mode === "new") next = { start: Math.min(d.t0, tt), end: Math.max(d.t0, tt) };
+    else if (d.mode === "move" && d.orig) {
+      const len = d.orig.end - d.orig.start;
+      const s = Math.max(0, Math.min(duration - len, d.orig.start + (tt - d.t0)));
+      next = { start: s, end: s + len };
+    } else if (d.mode === "start" && d.orig) next = { start: Math.min(tt, d.orig.end - MIN_LOOP), end: d.orig.end };
+    else if (d.mode === "end" && d.orig) next = { start: d.orig.start, end: Math.max(tt, d.orig.start + MIN_LOOP) };
+    else return;
+    live.current = next;
+    setRegion(next);
+    if (d.mode === "new") setCycle(true);
+  };
+
+  const onRulerUp = (e: PointerEvent<HTMLDivElement>) => {
+    const d = drag.current;
+    drag.current = null;
+    if (!d) return;
+    e.currentTarget.releasePointerCapture?.(e.pointerId);
+    if (!d.moved) {
+      // a plain click on the region toggles the cycle; on empty ruler it just moves the playhead
+      if (d.mode === "move" || d.mode === "start" || d.mode === "end") toggleCycle();
+      else cue(d.t0, loop);
+      return;
+    }
+    // commit the drawn/moved region to playback
+    const r = live.current;
+    live.current = null;
+    if (!r || r.end - r.start < MIN_LOOP) { setRegion(d.orig); return; }
+    const on = d.mode === "new" ? true : cycle;
+    cue(d.mode === "new" || d.mode === "move" ? r.start : position(), on ? r : null);
   };
 
   const flip = () => choose(track === "original" ? lastProcessed : "original");
+
+  // ruler ticks
+  const viewLen = v1 - v0;
+  const tickStep = viewLen > 30 ? 5 : viewLen > 12 ? 2 : viewLen > 5 ? 1 : 0.5;
+  const ticks: number[] = [];
+  for (let s = Math.ceil(v0 / tickStep) * tickStep; s <= v1 + 1e-6; s += tickStep) ticks.push(+s.toFixed(2));
+  const pct = (s: number) => `${((s - v0) / viewLen) * 100}%`;
 
   let num: Record<PathKey, number> = { sib: 0, click: 0, breath: 0 };
 
@@ -296,19 +402,43 @@ export default function Listen({ t }: { t: Dict["listen"] }) {
         ))}
       </div>
 
-      <div className="listen-canvas-wrap well">
-        <canvas
-          ref={canvas}
-          role="slider"
-          tabIndex={0}
-          aria-label={t.canvasLabel}
-          aria-valuemin={0}
-          aria-valuemax={Math.round(duration)}
-          aria-valuenow={Math.round(pos)}
-          aria-valuetext={fmt(pos)}
-          onClick={onCanvasClick}
-          onKeyDown={onKey}
-        />
+      <div className="listen-stage well">
+        <div
+          className="listen-ruler"
+          aria-label={t.rulerAria}
+          onPointerDown={onRulerDown}
+          onPointerMove={onRulerMove}
+          onPointerUp={onRulerUp}
+          onPointerCancel={() => (drag.current = null)}
+          onDoubleClick={() => region && clearRegion()}
+        >
+          {ticks.map((s) => (
+            <span key={s} className="tick" style={{ left: pct(s) }}>
+              {(s - v0) / viewLen < 0.93 && <span className="tick-label">{tickStep < 1 ? s.toFixed(1) : fmt(s)}</span>}
+            </span>
+          ))}
+          {region && (
+            <span className="cycle" data-on={cycle} style={{ left: pct(region.start), width: `${((region.end - region.start) / viewLen) * 100}%` }}>
+              <span className="cycle-handle" data-side="start" />
+              <span className="cycle-handle" data-side="end" />
+            </span>
+          )}
+          {!region && <span className="ruler-hint">{t.rulerHint}</span>}
+        </div>
+        <div className="listen-canvas-wrap">
+          <canvas
+            ref={canvas}
+            role="slider"
+            tabIndex={0}
+            aria-label={t.canvasLabel}
+            aria-valuemin={0}
+            aria-valuemax={Math.round(duration)}
+            aria-valuenow={Math.round(pos)}
+            aria-valuetext={fmt(pos)}
+            onClick={onCanvasClick}
+            onKeyDown={onKey}
+          />
+        </div>
       </div>
 
       <div className="listen-transport">
@@ -320,16 +450,29 @@ export default function Listen({ t }: { t: Dict["listen"] }) {
           )}
         </button>
         <span className="listen-time">{busy ? t.loading : `${fmt(pos)} / ${fmt(duration)}`}</span>
+        <button
+          type="button"
+          className="listen-cycle"
+          onClick={toggleCycle}
+          disabled={!region}
+          aria-pressed={!!loop}
+          title={region ? `${fmtFine(region.start)} ~ ${fmtFine(region.end)}` : t.rulerHint}
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M17 3l3 3-3 3M20 6H8a4 4 0 0 0-4 4v1M7 21l-3-3 3-3M4 18h12a4 4 0 0 0 4-4v-1" />
+          </svg>
+          <span>{t.cycle}</span>
+          {region && <span className="cycle-range">{fmtFine(region.start)} ~ {fmtFine(region.end)}</span>}
+        </button>
         <button type="button" className="listen-ab" onClick={flip} aria-label={t.abAria} aria-pressed={track === "original"}>
           <span className="ab-a" data-on={track === "original"}>A</span>
           <span className="ab-b" data-on={track !== "original"}>B</span>
           <span className="ab-label">{t.ab}</span>
         </button>
-        {loop && (
-          <button type="button" className="listen-loopoff" onClick={clearLoop}>
-            {t.loopOff}
-          </button>
-        )}
+        <span className="listen-links">
+          {region && <button type="button" className="listen-link" onClick={clearRegion}>{t.cycleClear}</button>}
+          {zoom && <button type="button" className="listen-link" onClick={() => setZoom(null)}>{t.zoomOut}</button>}
+        </span>
       </div>
 
       <div className="listen-moments">
@@ -337,7 +480,7 @@ export default function Listen({ t }: { t: Dict["listen"] }) {
         <ul>
           {MOMENTS.map((m) => {
             num = { ...num, [m.path]: num[m.path] + 1 };
-            const active = loop?.start === m.start;
+            const active = !!loop && loop.start === m.start && loop.end === m.end;
             return (
               <li key={m.start}>
                 <button type="button" className="moment" data-path={m.path} aria-pressed={active} onClick={() => playMoment(m)}>

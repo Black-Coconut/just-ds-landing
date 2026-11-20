@@ -31,7 +31,8 @@ export type Dict = {
   demo: { title: string; note: string; canvasLabel: string; knobs: Record<PathKey, { label: string; aria: string }> };
   listen: {
     title: string; note: string; canvasLabel: string; loading: string; play: string; pause: string; ab: string; abAria: string;
-    tracks: Record<"original" | PathKey | "all", string>; momentsTitle: string; loopOff: string;
+    tracks: Record<"original" | PathKey | "all", string>; momentsTitle: string;
+    rulerAria: string; rulerHint: string; cycle: string; cycleClear: string; zoomOut: string;
     hints: Record<PathKey, string>;
   };
   blocks: Block[];
@@ -136,7 +137,11 @@ export const ko: Dict = {
     abAria: "원본과 처리 결과를 번갈아 듣기",
     tracks: { original: "원본", sib: "치찰음", click: "파열음", breath: "후음", all: "세 가지 모두" },
     momentsTitle: "여기를 들어 보세요",
-    loopOff: "전체 듣기",
+    rulerAria: "구간 반복 막대. 드래그해 반복할 구간을 지정합니다.",
+    rulerHint: "여기를 드래그해 반복할 구간을 지정하세요",
+    cycle: "구간 반복",
+    cycleClear: "구간 지우기",
+    zoomOut: "전체 보기",
     hints: {
       sib: "s·sh 소리가 덜 따갑습니다",
       click: "입술·혀에서 나는 짧은 클릭이 줄어듭니다",
@@ -384,7 +389,11 @@ export const en: Dict = {
     abAria: "Switch between the original and the processed vocal",
     tracks: { original: "Original", sib: "Sibilance", click: "Clicks", breath: "Breaths", all: "All three" },
     momentsTitle: "Listen here",
-    loopOff: "Back to the full take",
+    rulerAria: "Loop bar. Drag to set a section to repeat.",
+    rulerHint: "Drag here to set a section to loop",
+    cycle: "Loop",
+    cycleClear: "Clear loop",
+    zoomOut: "Show full take",
     hints: {
       sib: "S and SH sounds get less harsh",
       click: "Short lip and tongue clicks get quieter",
