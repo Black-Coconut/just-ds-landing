@@ -3,7 +3,6 @@ import type { Dict } from "@/lib/content";
 import { DOWNLOADS } from "@/lib/site";
 import { KnobArt, KnobSprite } from "./Knob";
 import HeroKnob from "./HeroKnob";
-import Demo from "./Demo";
 import Listen from "./Listen";
 import LangHint from "./LangHint";
 import LangSwitch, { LangLink } from "./LangSwitch";
@@ -140,7 +139,7 @@ export default function Landing({ t }: { t: Dict }) {
           </div>
         </section>
 
-        {/* ---------- accurate detection ×3 + try it yourself ---------- */}
+        {/* ---------- accurate detection ×3 + real before/after audio ---------- */}
         <section className="section section-alt" id="features" aria-labelledby="detection-title">
           <div className="wrap">
             <SectionHead id="detection-title" eyebrow={t.detection.eyebrow} title={t.detection.title} lede={t.detection.lede} />
@@ -156,7 +155,6 @@ export default function Landing({ t }: { t: Dict }) {
                 </article>
               ))}
             </div>
-            <Demo t={t.demo} />
             <Listen t={t.listen} />
           </div>
         </section>

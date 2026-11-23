@@ -282,39 +282,11 @@ p { margin: 0 0 1em; }
 :lang(ko) .tongue-card .spec { letter-spacing: 0; text-transform: none; }
 .tongue-card .spec strong { color: var(--text); font-weight: 700; }
 
-/* ---------- demo ---------- */
-.demo { margin-top: 28px; padding: 22px; }
+/* ---------- panel heading (listen section) ---------- */
 .demo-head { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; flex-wrap: wrap; margin-bottom: 14px; }
 .demo-title { font-family: var(--font-display); font-weight: 700; font-size: 20px; letter-spacing: .06em; text-transform: uppercase; }
 :lang(ko) .demo-title { letter-spacing: 0; }
 .demo-note { font-size: 13px; color: var(--muted); margin: 0; }
-.demo-legend { display: flex; gap: 8px; margin-bottom: 10px; }
-.legend-chip {
-  --c: var(--lime);
-  display: inline-flex; align-items: center; gap: 7px; padding: 3px 10px 3px 8px; border-radius: 4px;
-  background: linear-gradient(#34353a, #26272b); border: 1px solid #0b0b0c;
-  font-family: var(--font-display); font-weight: 700; font-size: 13px; letter-spacing: .06em; text-transform: uppercase;
-}
-.legend-chip::before { content: ""; width: 3px; height: 12px; border-radius: 2px; background: var(--c); box-shadow: 0 0 8px var(--c); }
-.legend-chip[data-path="click"] { --c: var(--pink); }
-.legend-chip[data-path="breath"] { --c: var(--orange); }
-.demo-canvas-wrap { position: relative; height: clamp(170px, 22vw, 240px); padding: 0; overflow: hidden; }
-.demo-canvas-wrap canvas { width: 100%; height: 100%; }
-.demo-knobs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 18px; }
-.mini-knob { --c: var(--lime); display: flex; flex-direction: column; align-items: center; gap: 4px; }
-.mini-knob[data-path="click"] { --c: var(--pink); }
-.mini-knob[data-path="breath"] { --c: var(--orange); }
-.mini-knob .dial {
-  position: relative; width: 96px; height: 96px; cursor: ns-resize; touch-action: none; border-radius: 50%;
-}
-.mini-knob .dial svg { width: 100%; height: 100%; overflow: visible; }
-.mini-knob .dial .rot { transform-origin: 100px 100px; transform-box: view-box; }
-.mini-knob .arc { fill: none; stroke-width: 9; stroke-linecap: round; }
-.mini-knob .arc-bg { stroke: #0c0c0d; }
-.mini-knob .arc-fg { stroke: var(--c); filter: drop-shadow(0 0 4px var(--c)); }
-.mini-knob .label { font-family: var(--font-display); font-weight: 700; font-size: 17px; letter-spacing: .05em; text-transform: uppercase; color: var(--c); }
-:lang(ko) .mini-knob .label { letter-spacing: 0; }
-.mini-knob .val { font-family: var(--font-display); font-size: 14px; color: var(--muted); }
 
 /* ---------- comparison ---------- */
 .compare-wrap { padding: 8px; overflow-x: auto; }
@@ -489,7 +461,7 @@ p { margin: 0 0 1em; }
   .sale-badge { width: 88px; height: 88px; font-size: 28px; top: -20px; right: -6px; }
 }
 /* ---------- listen (real before/after audio) ---------- */
-.listen { margin-top: 20px; padding: 22px; }
+.listen { margin-top: 28px; padding: 22px; }
 .listen-tracks { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
 .listen-track {
   --c: #8d9097;
@@ -618,8 +590,6 @@ p { margin: 0 0 1em; }
   .header-actions { margin-left: auto; }
   .tongues-grid, .features, .dl-grid { grid-template-columns: 1fr; }
   .tongues-grid .tongue-card:first-child { grid-column: auto; }
-  .demo { padding: 14px; }
-  .mini-knob .dial { width: 76px; height: 76px; }
   .ticker span { font-size: 20px; }
   .hero-knob { width: 128px; left: auto; right: -4px; bottom: -22%; }
   .kf-list { columns: 1; }

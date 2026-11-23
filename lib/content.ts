@@ -28,7 +28,6 @@ export type Dict = {
   intro: { title: string; body: string[]; quote: string; quoteBy: string };
   detection: { eyebrow: string; title: string; lede: string; cards: Card[] };
   guide: { eyebrow: string; title: string; lede: string; factsTitle: string; facts: { k: string; v: string }[]; items: Qa[] };
-  demo: { title: string; note: string; canvasLabel: string; knobs: Record<PathKey, { label: string; aria: string }> };
   listen: {
     title: string; note: string; canvasLabel: string; loading: string; play: string; pause: string; ab: string; abAria: string;
     tracks: Record<"original" | PathKey | "all", string>; momentsTitle: string;
@@ -117,16 +116,6 @@ export const ko: Dict = {
         spec: "최대 감쇄 **12 dB** · 검출 대역 지정",
       },
     ],
-  },
-  demo: {
-    title: "직접 해 보세요!",
-    note: "노브를 위아래로 드래그하거나 방향키로 조절하세요. 동작 방식을 보여주는 시뮬레이션입니다. 체험판 다운로드는 필요 없습니다.",
-    canvasLabel: "보컬 파형 시뮬레이션. 색칠된 부분이 각 처리가 줄인 양입니다.",
-    knobs: {
-      sib: { label: "치찰음", aria: "치찰음 감쇄량" },
-      click: { label: "클릭", aria: "클릭·입소리 감쇄량" },
-      breath: { label: "숨소리", aria: "숨소리 감쇄량" },
-    },
   },
   listen: {
     title: "들어 보세요",
@@ -377,16 +366,6 @@ export const en: Dict = {
         spec: "Up to **12 dB** · adjustable detection band",
       },
     ],
-  },
-  demo: {
-    title: "Try it yourself!",
-    note: "Drag a knob up or down, or use the arrow keys. This is a simulation of how it works. No trial download required.",
-    canvasLabel: "Simulated vocal waveform. Coloured areas show how much each path removes.",
-    knobs: {
-      sib: { label: "Sibilance", aria: "Sibilance amount" },
-      click: { label: "Clicks", aria: "Clicks amount" },
-      breath: { label: "Breath", aria: "Breath amount" },
-    },
   },
   listen: {
     title: "Hear it",
