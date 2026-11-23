@@ -570,6 +570,36 @@ p { margin: 0 0 1em; }
 .moment-tag { font: 700 14px/1.2 var(--font-display); color: var(--c); letter-spacing: .03em; }
 .moment-time { font: 600 13px/1.2 var(--font-mono); color: var(--muted); }
 .moment-hint { grid-column: 1 / -1; font-size: 13.5px; color: var(--text-2); line-height: 1.45; }
+.listen-delta { --c: var(--gold); margin-top: 16px; padding: 12px 14px 10px; border-radius: var(--radius-sm); background: #1b1c1f; border: 1px solid var(--line-soft); }
+.listen-delta[data-path="sib"] { --c: var(--lime); }
+.listen-delta[data-path="click"] { --c: var(--pink); }
+.listen-delta[data-path="breath"] { --c: var(--orange); }
+.listen-delta-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
+.listen-delta-btn {
+  display: inline-flex; align-items: center; gap: 7px; padding: 7px 12px; border-radius: 999px; cursor: pointer; flex-shrink: 0;
+  background: linear-gradient(#34353a, #26272b); border: 1px solid #0b0b0c; color: var(--text-2); font: 700 14px/1 var(--font-display); letter-spacing: .06em;
+}
+.listen-delta-btn svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.listen-delta-btn[aria-pressed="true"] { color: #121306; background: var(--c); border-color: var(--c); box-shadow: 0 0 14px -4px var(--c); }
+.listen-delta-label { font: 700 14px/1.2 var(--font-display); color: var(--text-2); }
+.listen-delta-hz { margin-left: auto; font: 700 15px/1 var(--font-mono); color: var(--c); white-space: nowrap; }
+.band-bar { position: relative; height: 34px; border-radius: 4px; background: #0e0f10; border: 1px solid #000; cursor: ew-resize; touch-action: none; user-select: none; -webkit-user-select: none; }
+.band-bar[data-disabled="true"] { cursor: default; opacity: .45; pointer-events: none; }
+.band-grid { position: absolute; top: 0; bottom: 0; width: 1px; background: rgb(255 255 255 / .06); pointer-events: none; }
+.band-fill {
+  position: absolute; top: 0; bottom: 0; pointer-events: none;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--c) 18%, transparent), color-mix(in srgb, var(--c) 45%, transparent) 50%, color-mix(in srgb, var(--c) 18%, transparent));
+  opacity: .55; transition: opacity .15s;
+}
+.listen-delta[data-on="true"] .band-fill { opacity: 1; }
+.band-fill::after { content: ""; position: absolute; left: 50%; top: 0; bottom: 0; width: 2px; margin-left: -1px; background: var(--c); opacity: .8; }
+.band-handle { position: absolute; top: -1px; width: 0; height: 0; border-style: solid; border-color: #e9eaec transparent transparent transparent; cursor: ew-resize; outline: none; filter: drop-shadow(0 1px 2px rgb(0 0 0 / .6)); }
+.band-handle::before { content: ""; position: absolute; top: -2px; left: -14px; width: 28px; height: 36px; } /* touch target */
+.band-handle[data-side="lo"] { margin-left: -14px; border-width: 22px 0 0 14px; }
+.band-handle[data-side="hi"] { border-width: 22px 14px 0 0; }
+.band-handle:focus-visible { filter: drop-shadow(0 0 3px var(--c)); }
+.listen-delta-note { margin: 8px 0 0; font-size: 13px; color: var(--muted); line-height: 1.45; }
+.listen-delta-note .listen-link { font-size: 13px; padding: 0 2px; }
 @media (max-width: 760px) {
   .listen { padding: 14px; }
   .listen-moments ul { grid-template-columns: 1fr 1fr; }

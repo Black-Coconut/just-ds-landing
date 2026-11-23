@@ -34,6 +34,8 @@ export type Dict = {
     tracks: Record<"original" | PathKey | "all", string>; momentsTitle: string;
     rulerAria: string; rulerHint: string; cycle: string; cycleClear: string; zoomOut: string;
     hints: Record<PathKey, string>;
+    deltaAria: string; deltaHint: string; deltaPick: string;
+    bandLabel: Record<PathKey | "all", string>; bandAria: string; bandLow: string; bandHigh: string; bandReset: string;
   };
   blocks: Block[];
   compare: { eyebrow: string; title: string; lede: string; caption: string; cols: [string, string, string]; extraBadge: string; rows: Row[]; footnote: string };
@@ -147,6 +149,14 @@ export const ko: Dict = {
       click: "입술·혀에서 나는 짧은 클릭이 줄어듭니다",
       breath: "단어 사이 들숨이 작아집니다",
     },
+    deltaAria: "DELTA: 선택한 처리가 줄인 소리만 듣기",
+    deltaHint: "DELTA를 켜면 줄어든 소리 중 이 대역만 들립니다. 핸들을 끌어 범위를 바꿔 보세요.",
+    deltaPick: "치찰음·파열음·후음 중 하나를 고르면 대역을 조절할 수 있습니다.",
+    bandLabel: { sib: "치찰음 검출 대역", click: "ㅌ·입소리 검출 대역", breath: "ㅎ·숨소리 검출 대역", all: "듣는 대역" },
+    bandAria: "DELTA로 들을 주파수 대역. 핸들을 드래그해 조절합니다.",
+    bandLow: "대역 아래쪽",
+    bandHigh: "대역 위쪽",
+    bandReset: "기본값으로",
   },
   guide: {
     eyebrow: "How it works",
@@ -399,6 +409,14 @@ export const en: Dict = {
       click: "Short lip and tongue clicks get quieter",
       breath: "Breaths between words get quieter",
     },
+    deltaAria: "DELTA: hear only what the selected processing removed",
+    deltaHint: "With DELTA on you hear only the removed sound inside this band. Drag the handles to change it.",
+    deltaPick: "Pick Sibilance, Clicks or Breaths to adjust the band.",
+    bandLabel: { sib: "SIBILANCE DETECTION", click: "CLICK DETECTION", breath: "BREATH DETECTION", all: "LISTEN BAND" },
+    bandAria: "Frequency band heard in DELTA. Drag the handles to adjust it.",
+    bandLow: "Band low edge",
+    bandHigh: "Band high edge",
+    bandReset: "Reset",
   },
   guide: {
     eyebrow: "How it works",

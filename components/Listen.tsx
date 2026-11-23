@@ -11,7 +11,29 @@ type Span = { start: number; end: number };
 const TRACKS: TrackKey[] = ["original", "sib", "click", "breath", "all"];
 const COLORS: Record<TrackKey, string> = { original: "#8d9097", sib: "#a6dc2a", click: "#ff5d8f", breath: "#ffa91f", all: "#ffc21a" };
 const SRC = (k: TrackKey) => `/assets/audio/compare-${k}.m4a`;
+const DSRC = (k: DeltaKey) => `/assets/audio/delta-${k}.m4a`;
 const MIN_LOOP = 0.25; // s
+
+/* DELTA: what each path removed (original − processed, subtracted before encoding), heard through a
+   band-pass the visitor sets. Ranges and starting bands are the plugin's detection-band parameters. */
+type DeltaKey = PathKey | "all";
+const DELTAS: DeltaKey[] = ["sib", "click", "breath", "all"];
+type Band = { lo: number; hi: number };
+const BAND_RANGE: Record<DeltaKey, Band> = {
+  sib: { lo: 1000, hi: 20000 },
+  click: { lo: 500, hi: 20000 },
+  breath: { lo: 50, hi: 10000 },
+  all: { lo: 20, hi: 20000 },
+};
+const BAND_DEFAULT: Record<DeltaKey, Band> = {
+  sib: { lo: 4000, hi: 10000 },
+  click: { lo: 3000, hi: 11000 },
+  breath: { lo: 300, hi: 2500 },
+  all: { lo: 20, hi: 20000 },
+};
+const MIN_RATIO = 1.25; // narrowest band (hi / lo)
+const BW_Q = [0.5412, 1.3066]; // two cascaded biquads = 4th-order Butterworth (24 dB/oct)
+const fmtHz = (f: number) => (f < 1000 ? `${Math.round(f)}` : f < 10000 ? `${(f / 1000).toFixed(1)}k` : `${Math.round(f / 1000)}k`);
 const EDGE_PX = 8; // grab distance for the loop handles
 
 // where each path works hardest in this take (found by comparing the renders band by band)
@@ -25,7 +47,16 @@ const MOMENTS: { path: PathKey; start: number; end: number }[] = [
 ];
 
 type Peaks = { duration: number; hop: number; peaks: Record<TrackKey, number[]>; gr: Record<Exclude<TrackKey, "original">, number[]> };
-type Engine = { ctx: AudioContext; buffers: Record<TrackKey, AudioBuffer>; gains: Record<TrackKey, GainNode>; sources: AudioBufferSourceNode[] };
+type Engine = {
+  ctx: AudioContext;
+  buffers: Record<TrackKey, AudioBuffer>;
+  gains: Record<TrackKey, GainNode>;
+  dBuffers: Record<DeltaKey, AudioBuffer>;
+  dGains: Record<DeltaKey, GainNode>;
+  hp: BiquadFilterNode[];
+  lp: BiquadFilterNode[];
+  sources: AudioBufferSourceNode[];
+};
 type Drag = { mode: "new" | "move" | "start" | "end"; x0: number; t0: number; orig: Span | null; moved: boolean };
 
 const fmt = (s: number) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
@@ -51,12 +82,21 @@ export default function Listen({ t }: { t: Dict["listen"] }) {
   const [region, setRegion] = useState<Span | null>(null);
   const [cycle, setCycle] = useState(false);
   const [zoom, setZoom] = useState<Span | null>(null);
+  // DELTA monitor and the band it is heard through (one band per path, like the plugin)
+  const [delta, setDelta] = useState(false);
+  const [bands, setBands] = useState<Record<DeltaKey, Band>>(BAND_DEFAULT);
+  const bandDrag = useRef<"lo" | "hi" | null>(null);
 
   const loop = cycle && region ? region : null; // what the audio actually loops
   const loopRef = useRef(loop);
   loopRef.current = loop;
   const trackRef = useRef(track);
   trackRef.current = track;
+  const deltaRef = useRef(delta);
+  deltaRef.current = delta;
+  const bandRef = useRef(bands);
+  bandRef.current = bands;
+  const dKey: DeltaKey | null = track === "original" ? null : track;
 
   const duration = peaks?.duration ?? 45.7;
   const v0 = zoom?.start ?? 0;
@@ -71,22 +111,31 @@ export default function Listen({ t }: { t: Dict["listen"] }) {
     loading.current ??= (async () => {
       const Ctx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
       const ctx = new Ctx();
-      const decoded = await Promise.all(
-        TRACKS.map(async (k) => {
-          const data = await (await fetch(SRC(k))).arrayBuffer();
-          return new Promise<AudioBuffer>((res, rej) => ctx.decodeAudioData(data, res, rej));
-        }),
-      );
+      const decode = async (url: string) => {
+        const data = await (await fetch(url)).arrayBuffer();
+        return new Promise<AudioBuffer>((res, rej) => ctx.decodeAudioData(data, res, rej));
+      };
+      const [decoded, dDecoded] = await Promise.all([Promise.all(TRACKS.map((k) => decode(SRC(k)))), Promise.all(DELTAS.map((k) => decode(DSRC(k))))]);
       const buffers = Object.fromEntries(TRACKS.map((k, i) => [k, decoded[i]])) as Engine["buffers"];
+      const dBuffers = Object.fromEntries(DELTAS.map((k, i) => [k, dDecoded[i]])) as Engine["dBuffers"];
+      const level = (on: boolean) => { const g = ctx.createGain(); g.gain.value = on ? 1 : 0; return g; };
+      const tk = trackRef.current, dOn = deltaRef.current && tk !== "original";
       const gains = Object.fromEntries(
-        TRACKS.map((k) => {
-          const g = ctx.createGain();
-          g.gain.value = k === trackRef.current ? 1 : 0;
-          g.connect(ctx.destination);
-          return [k, g];
-        }),
+        TRACKS.map((k) => { const g = level(k === tk && !dOn); g.connect(ctx.destination); return [k, g]; }),
       ) as Engine["gains"];
-      engine.current = { ctx, buffers, gains, sources: [] };
+      // delta sources -> their gains -> HP x2 -> LP x2 -> out
+      const hp = BW_Q.map(() => ctx.createBiquadFilter());
+      const lp = BW_Q.map(() => ctx.createBiquadFilter());
+      hp.forEach((f, i) => { f.type = "highpass"; f.Q.value = BW_Q[i]; });
+      lp.forEach((f, i) => { f.type = "lowpass"; f.Q.value = BW_Q[i]; });
+      hp[0].connect(hp[1]); hp[1].connect(lp[0]); lp[0].connect(lp[1]); lp[1].connect(ctx.destination);
+      const b = tk === "original" ? BAND_DEFAULT.all : bandRef.current[tk];
+      hp.forEach((f) => (f.frequency.value = b.lo));
+      lp.forEach((f) => (f.frequency.value = b.hi));
+      const dGains = Object.fromEntries(
+        DELTAS.map((k) => { const g = level(dOn && k === tk); g.connect(hp[0]); return [k, g]; }),
+      ) as Engine["dGains"];
+      engine.current = { ctx, buffers, gains, dBuffers, dGains, hp, lp, sources: [] };
       return engine.current;
     })();
     return loading.current;
@@ -117,14 +166,15 @@ export default function Listen({ t }: { t: Dict["listen"] }) {
     stopSources();
     const at = l && from > l.end ? l.start : from;
     const when = e.ctx.currentTime + 0.03;
-    e.sources = TRACKS.map((k) => {
+    const src = (buf: AudioBuffer, out: AudioNode) => {
       const s = e.ctx.createBufferSource();
-      s.buffer = e.buffers[k];
+      s.buffer = buf;
       if (l) { s.loop = true; s.loopStart = l.start; s.loopEnd = l.end; }
-      s.connect(e.gains[k]);
+      s.connect(out);
       s.start(when, at);
       return s;
-    });
+    };
+    e.sources = [...TRACKS.map((k) => src(e.buffers[k], e.gains[k])), ...DELTAS.map((k) => src(e.dBuffers[k], e.dGains[k]))];
     e.sources[0].onended = () => { setPlaying(false); clock.current.offset = 0; setPos(0); };
     clock.current = { startedAt: when, offset: at, loop: l };
     return at;
@@ -162,19 +212,87 @@ export default function Listen({ t }: { t: Dict["listen"] }) {
     setPos(at);
   }, [duration, playing, startAt]);
 
-  const choose = useCallback((k: TrackKey) => {
-    setTrack(k);
-    if (k !== "original") setLastProcessed(k);
+  /** Point the band-pass at this path's band (smoothly while dragging). */
+  const tuneBand = useCallback((b: Band, glide = 0.015) => {
     const e = engine.current;
     if (!e) return;
     const now = e.ctx.currentTime;
-    for (const key of TRACKS) {
-      const g = e.gains[key].gain;
-      g.cancelScheduledValues(now);
-      g.setValueAtTime(g.value, now);
-      g.linearRampToValueAtTime(key === k ? 1 : 0, now + 0.02);
-    }
+    e.hp.forEach((f) => f.frequency.setTargetAtTime(b.lo, now, glide));
+    e.lp.forEach((f) => f.frequency.setTargetAtTime(b.hi, now, glide));
   }, []);
+
+  /** 20 ms crossfade to the chosen track, or to its DELTA when the monitor is on. */
+  const route = useCallback((k: TrackKey, dOn: boolean) => {
+    const e = engine.current;
+    if (!e) return;
+    const now = e.ctx.currentTime;
+    const ramp = (g: AudioParam, v: number) => { g.cancelScheduledValues(now); g.setValueAtTime(g.value, now); g.linearRampToValueAtTime(v, now + 0.02); };
+    const d = dOn && k !== "original";
+    for (const key of TRACKS) ramp(e.gains[key].gain, key === k && !d ? 1 : 0);
+    for (const key of DELTAS) ramp(e.dGains[key].gain, d && key === k ? 1 : 0);
+    if (k !== "original") tuneBand(bandRef.current[k], 0.005);
+  }, [tuneBand]);
+
+  const choose = useCallback((k: TrackKey) => {
+    setTrack(k);
+    if (k !== "original") setLastProcessed(k);
+    route(k, deltaRef.current);
+  }, [route]);
+
+  const toggleDelta = () => {
+    const on = !(delta && dKey); // on Original the button shows off, so a click always turns it on
+    setDelta(on);
+    let k = track;
+    if (on && k === "original") { k = lastProcessed; setTrack(k); }
+    route(k, on);
+  };
+
+  /* ---------- band bar: log-frequency axis, two handles ---------- */
+  const range = dKey ? BAND_RANGE[dKey] : BAND_RANGE.all;
+  const band = dKey ? bands[dKey] : BAND_DEFAULT.all;
+  const fx = (f: number) => Math.log(f / range.lo) / Math.log(range.hi / range.lo); // 0..1
+  const xf = (x: number) => range.lo * Math.pow(range.hi / range.lo, Math.max(0, Math.min(1, x)));
+
+  const setBand = (side: "lo" | "hi", f: number) => {
+    if (!dKey) return;
+    const cur = bandRef.current[dKey];
+    const next = side === "lo"
+      ? { lo: Math.max(range.lo, Math.min(f, cur.hi / MIN_RATIO)), hi: cur.hi }
+      : { lo: cur.lo, hi: Math.min(range.hi, Math.max(f, cur.lo * MIN_RATIO)) };
+    bandRef.current = { ...bandRef.current, [dKey]: next };
+    setBands(bandRef.current);
+    tuneBand(next);
+  };
+
+  const onBandDown = (e: PointerEvent<HTMLDivElement>) => {
+    if (e.button !== 0 || !dKey) return;
+    const r = e.currentTarget.getBoundingClientRect();
+    const x = (e.clientX - r.left) / r.width;
+    const side = Math.abs(x - fx(band.lo)) <= Math.abs(x - fx(band.hi)) ? "lo" : "hi";
+    bandDrag.current = side;
+    e.currentTarget.setPointerCapture(e.pointerId);
+    setBand(side, xf(x));
+  };
+  const onBandMove = (e: PointerEvent<HTMLDivElement>) => {
+    if (!bandDrag.current) return;
+    const r = e.currentTarget.getBoundingClientRect();
+    setBand(bandDrag.current, xf((e.clientX - r.left) / r.width));
+  };
+  const onBandKey = (side: "lo" | "hi") => (e: KeyboardEvent<HTMLSpanElement>) => {
+    const step = e.key === "ArrowRight" || e.key === "ArrowUp" ? 1 : e.key === "ArrowLeft" || e.key === "ArrowDown" ? -1 : 0;
+    if (!step) return;
+    e.preventDefault();
+    setBand(side, xf(fx(band[side]) + step / 40));
+  };
+  const resetBand = () => {
+    if (!dKey) return;
+    bandRef.current = { ...bandRef.current, [dKey]: BAND_DEFAULT[dKey] };
+    setBands(bandRef.current);
+    tuneBand(BAND_DEFAULT[dKey]);
+  };
+  const isDefaultBand = !dKey || (band.lo === BAND_DEFAULT[dKey].lo && band.hi === BAND_DEFAULT[dKey].hi);
+  // decade grid for the bar
+  const grid = [50, 100, 200, 500, 1000, 2000, 5000, 10000].filter((f) => f > range.lo && f < range.hi);
 
   const playMoment = (m: (typeof MOMENTS)[number]) => {
     const l = { start: m.start, end: m.end };
@@ -473,6 +591,50 @@ export default function Listen({ t }: { t: Dict["listen"] }) {
           {region && <button type="button" className="listen-link" onClick={clearRegion}>{t.cycleClear}</button>}
           {zoom && <button type="button" className="listen-link" onClick={() => setZoom(null)}>{t.zoomOut}</button>}
         </span>
+      </div>
+
+      <div className="listen-delta" data-path={dKey ?? "none"} data-on={delta && !!dKey}>
+        <div className="listen-delta-head">
+          <button type="button" className="listen-delta-btn" onClick={toggleDelta} aria-pressed={delta && !!dKey} aria-label={t.deltaAria}>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 15v-3a8 8 0 0 1 16 0v3" /><rect x="3" y="14" width="5" height="7" rx="1.5" /><rect x="16" y="14" width="5" height="7" rx="1.5" /></svg>
+            <span>DELTA</span>
+          </button>
+          <span className="listen-delta-label">{dKey ? t.bandLabel[dKey] : t.bandLabel.all}</span>
+          <span className="listen-delta-hz">{fmtHz(band.lo)} - {fmtHz(band.hi)} Hz</span>
+        </div>
+        <div
+          className="band-bar"
+          aria-label={t.bandAria}
+          data-disabled={!dKey}
+          onPointerDown={onBandDown}
+          onPointerMove={onBandMove}
+          onPointerUp={() => (bandDrag.current = null)}
+          onPointerCancel={() => (bandDrag.current = null)}
+          onDoubleClick={resetBand}
+        >
+          {grid.map((f) => <span key={f} className="band-grid" style={{ left: `${fx(f) * 100}%` }} />)}
+          <span className="band-fill" style={{ left: `${fx(band.lo) * 100}%`, width: `${(fx(band.hi) - fx(band.lo)) * 100}%` }} />
+          {(["lo", "hi"] as const).map((side) => (
+            <span
+              key={side}
+              className="band-handle"
+              data-side={side}
+              role="slider"
+              tabIndex={dKey ? 0 : -1}
+              aria-label={side === "lo" ? t.bandLow : t.bandHigh}
+              aria-valuemin={Math.round(range.lo)}
+              aria-valuemax={Math.round(range.hi)}
+              aria-valuenow={Math.round(band[side])}
+              aria-valuetext={`${fmtHz(band[side])} Hz`}
+              style={{ left: `${fx(band[side]) * 100}%` }}
+              onKeyDown={onBandKey(side)}
+            />
+          ))}
+        </div>
+        <p className="listen-delta-note">
+          {dKey ? t.deltaHint : t.deltaPick}
+          {dKey && !isDefaultBand && <> <button type="button" className="listen-link" onClick={resetBand}>{t.bandReset}</button></>}
+        </p>
       </div>
 
       <div className="listen-moments">
