@@ -8,6 +8,7 @@ import LangHint from "./LangHint";
 import LangSwitch, { LangLink } from "./LangSwitch";
 import JsonLd from "./JsonLd";
 import DownloadButton from "./DownloadButton";
+import DownloadTracker from "./DownloadTracker";
 
 /** "**bold**" → <strong>bold</strong> */
 function rich(s: string): ReactNode[] {
@@ -46,6 +47,7 @@ export default function Landing({ t }: { t: Dict }) {
   return (
     <>
       <JsonLd t={t} />
+      <DownloadTracker lang={t.lang} />
       <KnobSprite />
       <a className="sr-only" href="#main">{t.skip}</a>
 
@@ -61,13 +63,13 @@ export default function Landing({ t }: { t: Dict }) {
           <nav className="nav" aria-label={t.nav.aria}>
             <a href="#features">{t.nav.features}</a>
             <a href="#compare">{t.nav.compare}</a>
-            <a href="#download">{t.nav.download}</a>
+            <a href="#download" data-cta="nav">{t.nav.download}</a>
             <a href="#faq">{t.nav.faq}</a>
-            <a className="nav-shop" href="#download" aria-label={t.nav.shopAria}><s>{t.nav.shop}</s></a>
+            <a className="nav-shop" href="#download" data-cta="nav_shop" aria-label={t.nav.shopAria}><s>{t.nav.shop}</s></a>
           </nav>
           <div className="header-actions">
             <LangSwitch current={t.lang} aria={t.langToggle.aria} />
-            <a className="btn btn-gold btn-sm" href="#download">{t.headerCta}</a>
+            <a className="btn btn-gold btn-sm" href="#download" data-cta="header">{t.headerCta}</a>
           </div>
         </div>
       </header>
@@ -96,8 +98,8 @@ export default function Landing({ t }: { t: Dict }) {
                 <span className="price-note">{t.hero.priceNote}</span>
               </div>
               <div className="hero-ctas">
-                <a className="btn btn-gold" href="#download">{t.hero.ctaPrimary}</a>
-                <a className="btn btn-trial" href="#download">
+                <a className="btn btn-gold" href="#download" data-cta="hero">{t.hero.ctaPrimary}</a>
+                <a className="btn btn-trial" href="#download" data-cta="hero_trial">
                   <s>{t.hero.ctaTrialOld}</s> {t.hero.ctaTrialNew}
                 </a>
               </div>
@@ -331,7 +333,7 @@ export default function Landing({ t }: { t: Dict }) {
             <KnobArt className="big-knob" wag />
             <h2 id="final-title">{t.final.title}</h2>
             <p className="lede">{t.final.lede}</p>
-            <a className="btn btn-gold" href="#download">{t.final.cta}</a>
+            <a className="btn btn-gold" href="#download" data-cta="final">{t.final.cta}</a>
           </div>
         </section>
       </main>
